@@ -1,0 +1,89 @@
+@baseUrl = https://localhost:7001
+### Health check
+GET {{baseUrl}}/
+Accept: application/json
+
+
+### Register regular user
+# @name registerUser
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "userName": "user5",
+  "email": "user5@test.com",
+  "password": "123456"
+}
+
+
+### Login regular user
+# @name loginUser
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "userNameOrEmail": "user2",
+  "password": "123456"
+}
+
+
+### Get my products - regular user
+GET {{baseUrl}}/api/products/my
+Authorization: Bearer {{loginUser.response.body.$.token}}
+Accept: application/json
+
+
+### Mark product X as favorite - regular user
+PUT {{baseUrl}}/api/products/2/favorite
+Authorization: Bearer {{loginUser.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "isFavorite": true
+}
+
+
+### Unmark product X as favorite - regular user
+PUT {{baseUrl}}/api/products/1/favorite
+Authorization: Bearer {{loginUser.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "isFavorite": false
+}
+
+### Register admin user
+# @name registerAdmin
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "userName": "admin1",
+  "email": "admin1@test.com",
+  "password": "123456"
+}
+
+
+### Login admin user
+# @name loginAdmin
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "userNameOrEmail": "admin1",
+  "password": "123456"
+}
+
+
+### Get all users - admin
+GET {{baseUrl}}/api/admin/users
+Authorization: Bearer {{loginAdmin.response.body.$.token}}
+Accept: application/json
+
+
+### Get products for user X
+GET {{baseUrl}}/api/admin/users/3/products
+Authorization: Bearer {{loginAdmin.response.body.$.token}}
+Accept: application/json
+
+
