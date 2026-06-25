@@ -1,0 +1,99 @@
+.products-table-title {
+  margin: 0 0 18px;
+  padding-bottom: 14px;
+
+  border-bottom: 1px solid #e5e7eb;
+
+  font-size: 22px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.products-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.summary-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 8px 14px;
+  border-radius: 999px;
+
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 14px;
+}
+
+.summary-label {
+  font-weight: 600;
+}
+
+.summary-value {
+  font-weight: 700;
+  color: #1e40af;
+}
+
+.products-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 14px;
+
+  margin-bottom: 18px;
+  padding: 16px;
+
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+.search-box,
+.filter-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.search-box {
+  min-width: 260px;
+  flex: 1;
+}
+
+.search-box label,
+.filter-box label {
+  font-weight: 600;
+  color: #334155;
+}
+
+.search-box input,
+.filter-box select {
+  height: 40px;
+  padding: 0 12px;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+
+  background: #ffffff;
+  font-size: 14px;
+}
+
+.search-box input:focus,
+.filter-box select:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+.clear-btn {
+  height: 40px;
+}
+
+input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}

@@ -1,0 +1,68 @@
+<section class="page">
+  <div class="card form-card">
+    <h1 class="form-title">הרשמה</h1>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="form-field">
+        <label>שם משתמש</label>
+        <input
+          type="text"
+          formControlName="userName"
+          autocomplete="username"
+        />
+
+        @if (form.controls.userName.touched && form.controls.userName.invalid) {
+          <div class="error-message">שדה חובה</div>
+        }
+      </div>
+
+      <div class="form-field">
+        <label>אימייל</label>
+        <input
+          type="email"
+          formControlName="email"
+          autocomplete="email"
+        />
+
+        @if (form.controls.email.touched && form.controls.email.invalid) {
+          <div class="error-message">יש להזין אימייל תקין</div>
+        }
+      </div>
+
+      <div class="form-field">
+        <label>סיסמה</label>
+        <input
+          type="password"
+          formControlName="password"
+          autocomplete="new-password"
+        />
+
+        @if (form.controls.password.touched && form.controls.password.invalid) {
+          <div class="error-message">שדה חובה</div>
+        }
+      </div>
+
+      @if (errorMessage()) {
+        <div class="error-message">
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <div class="actions">
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="isLoading()"
+        >
+          @if (isLoading()) {
+            נרשם...
+          } @else {
+            הרשמה
+          }
+        </button>
+
+        <a routerLink="/login">כבר יש לך משתמש? כניסה</a>
+      </div>
+    </form>
+  </div>
+</section>

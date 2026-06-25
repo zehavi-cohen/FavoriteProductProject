@@ -1,0 +1,97 @@
+<div class="card">
+  <h2 class="products-table-title">
+    {{ title() }}
+  </h2>
+
+  <div class="products-summary">
+    <div class="summary-item">
+      <span class="summary-label">סה"כ מוצרים:</span>
+      <span class="summary-value">{{ totalProducts() }}</span>
+    </div>
+
+    <div class="summary-item">
+      <span class="summary-label">מוצרים אהובים:</span>
+      <span class="summary-value">{{ favoriteProductsCount() }}</span>
+    </div>
+
+    <div class="summary-item">
+      <span class="summary-label">מוצגים כרגע:</span>
+      <span class="summary-value">{{ displayedProductsCount() }}</span>
+    </div>
+  </div>
+
+  <div class="products-toolbar">
+    <div class="search-box">
+      <label>חיפוש מוצר</label>
+
+      <input
+        #searchInput
+        type="text"
+        [value]="searchText()"
+        placeholder="חיפוש לפי שם, קוד או תיאור"
+        (input)="onSearchChanged(searchInput.value)"
+      />
+    </div>
+
+    <div class="filter-box">
+      <label>סינון</label>
+
+      <select
+        #filterSelect
+        [value]="filter()"
+        (change)="onFilterChanged(filterSelect.value)"
+      >
+        <option value="all">כל המוצרים</option>
+        <option value="favorites">אהובים בלבד</option>
+        <option value="notFavorites">לא אהובים בלבד</option>
+      </select>
+    </div>
+
+    <button
+      type="button"
+      class="btn btn-secondary clear-btn"
+      (click)="clearFilters()"
+    >
+      ניקוי סינון
+    </button>
+  </div>
+
+  @if (filteredProducts().length === 0) {
+    <div class="empty-state">
+      לא נמצאו מוצרים להצגה
+    </div>
+  } @else {
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>מס׳</th>
+            <th>קוד מוצר</th>
+            <th>שם מוצר</th>
+            <th>תיאור</th>
+            <th class="checkbox-cell">מוצר אהוב</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (product of filteredProducts(); track product.productId; let index = $index) {
+            <tr>
+              <td>{{ index + 1 }}</td>
+              <td>{{ product.code || '-' }}</td>
+              <td>{{ product.productName }}</td>
+              <td>{{ product.description || '-' }}</td>
+              <td class="checkbox-cell">
+                <input
+                  #favoriteInput
+                  type="checkbox"
+                  [checked]="product.isFavorite"
+                  (change)="onFavoriteChanged(product, favoriteInput.checked)"
+                />
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

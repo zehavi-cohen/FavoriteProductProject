@@ -1,0 +1,55 @@
+<section class="page">
+  <div class="card form-card">
+    <h1 class="form-title">כניסה למערכת</h1>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="form-field">
+        <label>שם משתמש או אימייל</label>
+        <input
+          type="text"
+          formControlName="userNameOrEmail"
+          autocomplete="username"
+        />
+
+        @if (form.controls.userNameOrEmail.touched && form.controls.userNameOrEmail.invalid) {
+          <div class="error-message">שדה חובה</div>
+        }
+      </div>
+
+      <div class="form-field">
+        <label>סיסמה</label>
+        <input
+          type="password"
+          formControlName="password"
+          autocomplete="current-password"
+        />
+
+        @if (form.controls.password.touched && form.controls.password.invalid) {
+          <div class="error-message">שדה חובה</div>
+        }
+      </div>
+
+      @if (errorMessage()) {
+        <div class="error-message">
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <div class="actions">
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="isLoading()"
+        >
+          @if (isLoading()) {
+            מתחבר...
+          } @else {
+            כניסה
+          }
+        </button>
+
+        <a routerLink="/register">אין לך משתמש? הרשמה</a>
+      </div>
+    </form>
+  </div>
+</section>

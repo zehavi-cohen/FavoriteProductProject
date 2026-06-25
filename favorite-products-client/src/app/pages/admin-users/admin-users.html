@@ -1,0 +1,79 @@
+<section class="page">
+  <h1 class="page-title">ניהול משתמשים</h1>
+
+  <div class="admin-banner">
+    מסך מנהל — ניתן לצפות במשתמשים ולראות את המוצרים האהובים של כל משתמש.
+  </div>
+
+  @if (isLoading()) {
+    <div class="card">
+      טוען משתמשים...
+    </div>
+  } @else {
+    @if (errorMessage()) {
+      <div class="error-message">
+        {{ errorMessage() }}
+      </div>
+    }
+
+    <div class="card">
+      @if (users().length === 0) {
+        <div class="empty-state">
+          לא נמצאו משתמשים להצגה
+        </div>
+      } @else {
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>מספר משתמש</th>
+                <th>שם משתמש</th>
+                <th>אימייל</th>
+                <th>הרשאות</th>
+                <th>סטטוס</th>
+                <th>פעולות</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (user of users(); track user.userId) {
+                <tr>
+                  <td>{{ user.userId }}</td>
+                  <td>{{ user.userName }}</td>
+                  <td>{{ user.email }}</td>
+                  <td>
+                    @if (isAdmin(user)) {
+                      <span class="badge badge-admin">
+                        {{ getRolesText(user) }}
+                      </span>
+                    } @else {
+                      <span class="badge badge-user">
+                        {{ getRolesText(user) }}
+                      </span>
+                    }
+                  </td>
+                  <td>
+                    @if (user.isActive) {
+                      פעיל
+                    } @else {
+                      לא פעיל
+                    }
+                  </td>
+                  <td>
+                    <a
+                      class="btn btn-secondary"
+                      [routerLink]="['/admin/users', user.userId, 'products']"
+                      [queryParams]="{ userName: user.userName }"
+                    >
+                      צפייה במוצרים
+                    </a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
+</section>
