@@ -13,8 +13,12 @@ export class AdminService {
   constructor(private http: HttpClient) {}
 
   getUsers() {
-    return this.http.get<AdminUser[]>(`${this.apiUrl}/api/admin/users`);
-  }
+ return this.http.get<Product[]>(
+      `${this.apiUrl}/api/admin/users//products`
+    );  }
+  // getUsers() {
+  //   return this.http.get<AdminUser[]>(`${this.apiUrl}/api/admin/users`);
+  // }
 
   getUserProducts(userId: number) {
     return this.http.get<Product[]>(
