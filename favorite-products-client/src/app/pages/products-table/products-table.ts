@@ -19,7 +19,7 @@ export class ProductsTable {
   filter = signal<ProductsFilter>('all');
 
   totalProducts = computed(() => this.products().length);
-
+  
   favoriteProductsCount = computed(() =>
     this.products().filter(product => product.isFavorite).length
   );

@@ -17,7 +17,6 @@ public static class ProductEndpoints
             ProductService productService) =>
         {
             var userId = httpContext.User.GetUserId();
-
             var products = await productService.GetProductsForUserAsync(userId);
 
             return Results.Ok(products);
@@ -31,12 +30,12 @@ public static class ProductEndpoints
         {
             var userId = httpContext.User.GetUserId();
 
-            var success = await productService.SetFavoriteAsync(
+            var updated = await productService.SetFavoriteAsync(
                 userId,
                 productId,
                 request.IsFavorite);
 
-            if (!success)
+            if (!updated)
             {
                 return Results.NotFound("Product was not found.");
             }
