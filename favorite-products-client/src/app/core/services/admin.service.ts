@@ -13,6 +13,7 @@ export class AdminService {
   constructor(private http: HttpClient) {}
 
   getUsers() {
+    //comment
     return this.http.get<AdminUser[]>(`${this.apiUrl}/api/admin/users`);
   }
 
