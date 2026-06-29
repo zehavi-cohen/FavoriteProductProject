@@ -1,6 +1,7 @@
 ﻿using backend.DTOs.Products;
 using backend.Extensions;
 using backend.Services;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace backend.Endpoints;
 
@@ -12,37 +13,42 @@ public static class ProductEndpoints
             .WithTags("Products")
             .RequireAuthorization();
 
-        group.MapGet("/my", async (
-            HttpContext httpContext,
-            ProductService productService) =>
-        {
-            var userId = httpContext.User.GetUserId();
-            var products = await productService.GetProductsForUserAsync(userId);
+        group.MapGet("/my", GetMyProductsAsync);
 
-            return Results.Ok(products);
-        });
-
-        group.MapPut("/{productId:int}/favorite", async (
-            int productId,
-            SetFavoriteRequest request,
-            HttpContext httpContext,
-            ProductService productService) =>
-        {
-            var userId = httpContext.User.GetUserId();
-
-            var updated = await productService.SetFavoriteAsync(
-                userId,
-                productId,
-                request.IsFavorite);
-
-            if (!updated)
-            {
-                return Results.NotFound("Product was not found.");
-            }
-
-            return Results.NoContent();
-        });
+        group.MapPut("/{productId:int}/favorite", SetFavoriteAsync);
 
         return app;
+    }
+
+    private static async Task<Ok<List<ProductDto>>> GetMyProductsAsync(
+        HttpContext httpContext,
+        ProductService productService)
+    {
+        var userId = httpContext.User.GetUserId();
+
+        var products = await productService.GetProductsForUserAsync(userId);
+
+        return TypedResults.Ok(products);
+    }
+
+    private static async Task<Results<NoContent, NotFound<string>>> SetFavoriteAsync(
+        int productId,
+        SetFavoriteRequest request,
+        HttpContext httpContext,
+        ProductService productService)
+    {
+        var userId = httpContext.User.GetUserId();
+
+        var updated = await productService.SetFavoriteAsync(
+            userId,
+            productId,
+            request.IsFavorite);
+
+        if (!updated)
+        {
+            return TypedResults.NotFound("Product was not found.");
+        }
+
+        return TypedResults.NoContent();
     }
 }

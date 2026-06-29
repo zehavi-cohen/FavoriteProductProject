@@ -1,5 +1,6 @@
 ﻿using backend.DTOs.Auth;
 using backend.Services;
+using backend.Extensions;
 
 namespace backend.Endpoints;
 
@@ -10,40 +11,28 @@ public static class AuthEndpoints
         var group = app.MapGroup("/api/auth")
             .WithTags("Auth");
 
-        group.MapPost("/register", async (
-            RegisterRequest request,
-            AuthService authService) =>
-        {
-            var result = await authService.RegisterAsync(request);
+        group.MapPost("/register", RegisterAsync);
 
-            return ToHttpResult(result);
-        });
-
-        group.MapPost("/login", async (
-            LoginRequest request,
-            AuthService authService) =>
-        {
-            var result = await authService.LoginAsync(request);
-
-            return ToHttpResult(result);
-        });
+        group.MapPost("/login", LoginAsync);
 
         return app;
     }
 
-    private static IResult ToHttpResult<T>(ServiceResult<T> result)
+    private static async Task<IResult> RegisterAsync(
+        RegisterRequest request,
+        AuthService authService)
     {
-        if (result.IsSuccess)
-        {
-            return Results.Ok(result.Data);
-        }
+        var result = await authService.RegisterAsync(request);
 
-        return result.StatusCode switch
-        {
-            StatusCodes.Status400BadRequest => Results.BadRequest(result.ErrorMessage),
-            StatusCodes.Status401Unauthorized => Results.Unauthorized(),
-            StatusCodes.Status404NotFound => Results.NotFound(result.ErrorMessage),
-            _ => Results.Problem(result.ErrorMessage)
-        };
+        return result.ToHttpResult();
+    }
+
+    private static async Task<IResult> LoginAsync(
+        LoginRequest request,
+        AuthService authService)
+    {
+        var result = await authService.LoginAsync(request);
+
+        return result.ToHttpResult();
     }
 }

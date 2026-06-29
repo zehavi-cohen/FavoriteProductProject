@@ -1,5 +1,6 @@
 ﻿using backend.DTOs.Products;
 using backend.Services;
+using backend.Extensions;
 
 namespace backend.Endpoints;
 
@@ -11,58 +12,52 @@ public static class AdminEndpoints
             .WithTags("Admin")
             .RequireAuthorization("AdminOnly");
 
-        group.MapGet("/users", async (
-            AdminService adminService) =>
-        {
-            var result = await adminService.GetUsersAsync();
+        group.MapGet("/users", GetUsersAsync);
 
-            return ToHttpResult(result);
-        });
+        group.MapGet("/users/{userId:int}/products", GetUserProductsAsync);
 
-        group.MapGet("/users/{userId:int}/products", async (
-            int userId,
-            AdminService adminService) =>
-        {
-            var result = await adminService.GetUserProductsAsync(userId);
-
-            return ToHttpResult(result);
-        });
-
-        group.MapPut("/users/{userId:int}/products/{productId:int}/favorite", async (
-            int userId,
-            int productId,
-            SetFavoriteRequest request,
-            AdminService adminService) =>
-        {
-            var result = await adminService.SetFavoriteForUserAsync(
-                userId,
-                productId,
-                request.IsFavorite);
-
-            if (result.IsSuccess)
-            {
-                return Results.NoContent();
-            }
-
-            return ToHttpResult(result);
-        });
+        group.MapPut(
+            "/users/{userId:int}/products/{productId:int}/favorite",
+            SetFavoriteForUserAsync
+        );
 
         return app;
     }
 
-    private static IResult ToHttpResult<T>(ServiceResult<T> result)
+    private static async Task<IResult> GetUsersAsync(
+        AdminService adminService)
     {
+        var result = await adminService.GetUsersAsync();
+
+        return result.ToHttpResult();
+    }
+
+    private static async Task<IResult> GetUserProductsAsync(
+        int userId,
+        AdminService adminService)
+    {
+        var result = await adminService.GetUserProductsAsync(userId);
+
+        return result.ToHttpResult();
+    }
+
+    private static async Task<IResult> SetFavoriteForUserAsync(
+        int userId,
+        int productId,
+        SetFavoriteRequest request,
+        AdminService adminService)
+    {
+        var result = await adminService.SetFavoriteForUserAsync(
+            userId,
+            productId,
+            request.IsFavorite);
+
         if (result.IsSuccess)
         {
-            return Results.Ok(result.Data);
+            return Results.NoContent();
         }
 
-        return result.StatusCode switch
-        {
-            StatusCodes.Status400BadRequest => Results.BadRequest(result.ErrorMessage),
-            StatusCodes.Status401Unauthorized => Results.Unauthorized(),
-            StatusCodes.Status404NotFound => Results.NotFound(result.ErrorMessage),
-            _ => Results.Problem(result.ErrorMessage)
-        };
+        return result.ToHttpResult();
     }
+
 }
