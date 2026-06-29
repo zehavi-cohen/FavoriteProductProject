@@ -1,6 +1,6 @@
 ﻿using backend.Data;
 using backend.DTOs.Admin;
-using backend.DTOs.Products;
+using backend.DTOs.Auth;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Services;
@@ -8,19 +8,19 @@ namespace backend.Services;
 public class AdminService
 {
     private readonly AppDbContext _db;
-    private readonly ProductService _productService;
+    private readonly TokenService _tokenService;
 
     public AdminService(
         AppDbContext db,
-        ProductService productService)
+        TokenService tokenService)
     {
         _db = db;
-        _productService = productService;
+        _tokenService = tokenService;
     }
 
-    public async Task<ServiceResult<List<AdminUserDto>>> GetUsersAsync()
+    public async Task<List<AdminUserDto>> GetUsersAsync()
     {
-        var users = await _db.AppUsers
+        return await _db.AppUsers
             .AsNoTracking()
             .Include(x => x.UserRoles)
                 .ThenInclude(x => x.Role)
@@ -36,48 +36,91 @@ public class AdminService
                     .ToList()
             })
             .ToListAsync();
-
-        return ServiceResult<List<AdminUserDto>>.Success(users);
     }
 
-    public async Task<ServiceResult<List<ProductDto>>> GetUserProductsAsync(int userId)
-    {
-        var userExists = await _db.AppUsers
-            .AnyAsync(x => x.Id == userId);
-
-        if (!userExists)
-        {
-            return ServiceResult<List<ProductDto>>.NotFound("User was not found.");
-        }
-
-        var products = await _productService.GetProductsForUserAsync(userId);
-
-        return ServiceResult<List<ProductDto>>.Success(products);
-    }
-
-    public async Task<ServiceResult<bool>> SetFavoriteForUserAsync(
+    public async Task<LoginAsUserResult> LoginAsUserAsync(
         int userId,
-        int productId,
-        bool isFavorite)
+        int adminUserId)
     {
-        var userExists = await _db.AppUsers
-            .AnyAsync(x => x.Id == userId);
-
-        if (!userExists)
+        if (userId == adminUserId)
         {
-            return ServiceResult<bool>.NotFound("User was not found.");
+            return new LoginAsUserResult(LoginAsUserStatus.SameUser);
         }
 
-        var updated = await _productService.SetFavoriteAsync(
-            userId,
-            productId,
-            isFavorite);
+        var adminUser = await _db.AppUsers
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == adminUserId);
 
-        if (!updated)
+        if (adminUser == null)
         {
-            return ServiceResult<bool>.NotFound("Product was not found.");
+            return new LoginAsUserResult(LoginAsUserStatus.AdminNotFound);
         }
 
-        return ServiceResult<bool>.Success(true);
+        if (!adminUser.IsActive)
+        {
+            return new LoginAsUserResult(LoginAsUserStatus.AdminInactive);
+        }
+
+        var targetUser = await _db.AppUsers
+            .AsNoTracking()
+            .Include(x => x.UserRoles)
+                .ThenInclude(x => x.Role)
+            .FirstOrDefaultAsync(x => x.Id == userId);
+
+        if (targetUser == null)
+        {
+            return new LoginAsUserResult(LoginAsUserStatus.TargetUserNotFound);
+        }
+
+        if (!targetUser.IsActive)
+        {
+            return new LoginAsUserResult(LoginAsUserStatus.TargetUserInactive);
+        }
+
+        var targetUserIsAdmin = targetUser.UserRoles
+            .Any(x => x.Role.Name == "Admin");
+
+        if (targetUserIsAdmin)
+        {
+            return new LoginAsUserResult(LoginAsUserStatus.TargetUserIsAdmin);
+        }
+
+        var token = _tokenService.CreateToken(
+            targetUser,
+            adminUser.Id,
+            adminUser.UserName);
+
+        var response = new AuthResponse
+        {
+            UserId = targetUser.Id,
+            UserName = targetUser.UserName,
+            Email = targetUser.Email,
+            Roles = targetUser.UserRoles
+                .Select(x => x.Role.Name)
+                .ToList(),
+            Token = token,
+            IsImpersonating = true,
+            ImpersonatedByUserId = adminUser.Id,
+            ImpersonatedByUserName = adminUser.UserName
+        };
+
+        return new LoginAsUserResult(
+            LoginAsUserStatus.Success,
+            response);
     }
+}
+
+public record LoginAsUserResult(
+    LoginAsUserStatus Status,
+    AuthResponse? AuthResponse = null);
+
+public enum LoginAsUserStatus
+{
+    Success,
+    SameUser,
+    AdminNotFound,
+    AdminInactive,
+    TargetUserNotFound,
+    TargetUserInactive,
+    TargetUserIsAdmin
 }

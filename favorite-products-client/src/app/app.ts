@@ -18,4 +18,12 @@ export class App {
     this.auth.logout();
     this.router.navigate(['/login']);
   }
+
+  backToAdmin(): void {
+    const restored = this.auth.stopImpersonation();
+
+    if (restored) {
+      this.router.navigate(['/admin/users']);
+    }
+  }
 }

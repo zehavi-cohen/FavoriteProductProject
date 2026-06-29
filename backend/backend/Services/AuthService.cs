@@ -22,38 +22,23 @@ public class AuthService
         _tokenService = tokenService;
     }
 
-    public async Task<ServiceResult<AuthResponse>> RegisterAsync(RegisterRequest request)
+    public async Task<bool> UserExistsAsync(
+        string userName,
+        string email)
     {
-        if (string.IsNullOrWhiteSpace(request.UserName))
-        {
-            return ServiceResult<AuthResponse>.BadRequest("User name is required.");
-        }
+        return await _db.AppUsers.AnyAsync(x =>
+            x.UserName == userName ||
+            x.Email == email);
+    }
 
-        if (string.IsNullOrWhiteSpace(request.Email))
-        {
-            return ServiceResult<AuthResponse>.BadRequest("Email is required.");
-        }
-
-        if (string.IsNullOrWhiteSpace(request.Password))
-        {
-            return ServiceResult<AuthResponse>.BadRequest("Password is required.");
-        }
-
-        var exists = await _db.AppUsers.AnyAsync(x =>
-            x.UserName == request.UserName ||
-            x.Email == request.Email);
-
-        if (exists)
-        {
-            return ServiceResult<AuthResponse>.BadRequest("User name or email already exists.");
-        }
-
+    public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
+    {
         var userRole = await _db.Roles
             .FirstOrDefaultAsync(x => x.Name == "User");
 
         if (userRole == null)
         {
-            return ServiceResult<AuthResponse>.Problem("Role 'User' was not found in database.");
+            throw new InvalidOperationException("Role 'User' was not found in database.");
         }
 
         var user = new AppUser
@@ -64,7 +49,9 @@ public class AuthService
             CreatedAt = DateTime.UtcNow
         };
 
-        user.PasswordHash = _passwordHasher.HashPassword(user, request.Password);
+        user.PasswordHash = _passwordHasher.HashPassword(
+            user,
+            request.Password);
 
         user.UserRoles.Add(new AppUserRole
         {
@@ -81,23 +68,11 @@ public class AuthService
                 .ThenInclude(x => x.Role)
             .FirstAsync(x => x.Id == user.Id);
 
-        var response = CreateAuthResponse(userWithRoles);
-
-        return ServiceResult<AuthResponse>.Success(response);
+        return CreateAuthResponse(userWithRoles);
     }
 
-    public async Task<ServiceResult<AuthResponse>> LoginAsync(LoginRequest request)
+    public async Task<AuthResponse?> LoginAsync(LoginRequest request)
     {
-        if (string.IsNullOrWhiteSpace(request.UserNameOrEmail))
-        {
-            return ServiceResult<AuthResponse>.BadRequest("User name or email is required.");
-        }
-
-        if (string.IsNullOrWhiteSpace(request.Password))
-        {
-            return ServiceResult<AuthResponse>.BadRequest("Password is required.");
-        }
-
         var user = await _db.AppUsers
             .Include(x => x.UserRoles)
                 .ThenInclude(x => x.Role)
@@ -107,12 +82,12 @@ public class AuthService
 
         if (user == null)
         {
-            return ServiceResult<AuthResponse>.Unauthorized();
+            return null;
         }
 
         if (!user.IsActive)
         {
-            return ServiceResult<AuthResponse>.BadRequest("User is not active.");
+            return null;
         }
 
         var passwordResult = _passwordHasher.VerifyHashedPassword(
@@ -122,12 +97,10 @@ public class AuthService
 
         if (passwordResult == PasswordVerificationResult.Failed)
         {
-            return ServiceResult<AuthResponse>.Unauthorized();
+            return null;
         }
 
-        var response = CreateAuthResponse(user);
-
-        return ServiceResult<AuthResponse>.Success(response);
+        return CreateAuthResponse(user);
     }
 
     private AuthResponse CreateAuthResponse(AppUser user)

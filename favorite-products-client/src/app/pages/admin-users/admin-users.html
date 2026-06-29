@@ -2,7 +2,7 @@
   <h1 class="page-title">ניהול משתמשים</h1>
 
   <div class="admin-banner">
-    מסך מנהל — ניתן לצפות במשתמשים ולראות את המוצרים האהובים של כל משתמש.
+    מסך מנהל — ניתן לצפות במשתמשים ולהיכנס כמשתמש רגיל לצורך בדיקה.
   </div>
 
   @if (isLoading()) {
@@ -60,13 +60,14 @@
                     }
                   </td>
                   <td>
-                    <a
-                      class="btn btn-secondary"
-                      [routerLink]="['/admin/users', user.userId, 'products']"
-                      [queryParams]="{ userName: user.userName }"
+                    <button
+                      type="button"
+                      class="btn btn-primary"
+                      (click)="loginAsUser(user)"
+                      [disabled]="isAdmin(user) || !user.isActive"
                     >
-                      צפייה במוצרים
-                    </a>
+                      כניסה כמשתמש
+                    </button>
                   </td>
                 </tr>
               }

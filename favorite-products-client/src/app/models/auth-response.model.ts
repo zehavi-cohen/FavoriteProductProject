@@ -4,4 +4,8 @@ export interface AuthResponse {
   email: string;
   roles: string[];
   token: string;
+
+  isImpersonating: boolean;
+  impersonatedByUserId: number | null;
+  impersonatedByUserName: string | null;
 }

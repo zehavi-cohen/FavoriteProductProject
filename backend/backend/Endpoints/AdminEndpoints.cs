@@ -1,6 +1,8 @@
-﻿using backend.DTOs.Products;
-using backend.Services;
+﻿using backend.DTOs.Admin;
+using backend.DTOs.Auth;
 using backend.Extensions;
+using backend.Services;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace backend.Endpoints;
 
@@ -14,50 +16,55 @@ public static class AdminEndpoints
 
         group.MapGet("/users", GetUsersAsync);
 
-        group.MapGet("/users/{userId:int}/products", GetUserProductsAsync);
-
-        group.MapPut(
-            "/users/{userId:int}/products/{productId:int}/favorite",
-            SetFavoriteForUserAsync
-        );
+        group.MapPost("/users/{userId:int}/login-as", LoginAsUserAsync);
 
         return app;
     }
 
-    private static async Task<IResult> GetUsersAsync(
+    private static async Task<Ok<List<AdminUserDto>>> GetUsersAsync(
         AdminService adminService)
     {
-        var result = await adminService.GetUsersAsync();
+        var users = await adminService.GetUsersAsync();
 
-        return result.ToHttpResult();
+        return TypedResults.Ok(users);
     }
 
-    private static async Task<IResult> GetUserProductsAsync(
+    private static async Task<Results<Ok<AuthResponse>, BadRequest<string>, UnauthorizedHttpResult, NotFound<string>, ProblemHttpResult>> LoginAsUserAsync(
         int userId,
+        HttpContext httpContext,
         AdminService adminService)
     {
-        var result = await adminService.GetUserProductsAsync(userId);
+        var adminUserId = httpContext.User.GetUserId();
 
-        return result.ToHttpResult();
-    }
-
-    private static async Task<IResult> SetFavoriteForUserAsync(
-        int userId,
-        int productId,
-        SetFavoriteRequest request,
-        AdminService adminService)
-    {
-        var result = await adminService.SetFavoriteForUserAsync(
+        var result = await adminService.LoginAsUserAsync(
             userId,
-            productId,
-            request.IsFavorite);
+            adminUserId);
 
-        if (result.IsSuccess)
+        return result.Status switch
         {
-            return Results.NoContent();
-        }
+            LoginAsUserStatus.Success when result.AuthResponse != null =>
+                TypedResults.Ok(result.AuthResponse),
 
-        return result.ToHttpResult();
+            LoginAsUserStatus.SameUser =>
+                TypedResults.BadRequest("Admin cannot login as himself."),
+
+            LoginAsUserStatus.AdminNotFound =>
+                TypedResults.Unauthorized(),
+
+            LoginAsUserStatus.AdminInactive =>
+                TypedResults.BadRequest("Admin user is not active."),
+
+            LoginAsUserStatus.TargetUserNotFound =>
+                TypedResults.NotFound("User was not found."),
+
+            LoginAsUserStatus.TargetUserInactive =>
+                TypedResults.BadRequest("User is not active."),
+
+            LoginAsUserStatus.TargetUserIsAdmin =>
+                TypedResults.BadRequest("Cannot login as another admin user."),
+
+            _ =>
+                TypedResults.Problem("Login as user failed.")
+        };
     }
-
 }

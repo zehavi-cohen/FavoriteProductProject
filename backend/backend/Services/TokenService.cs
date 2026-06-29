@@ -8,6 +8,10 @@ namespace backend.Services;
 
 public class TokenService
 {
+    public const string IsImpersonatingClaim = "is_impersonating";
+    public const string ImpersonatedByUserIdClaim = "impersonated_by_user_id";
+    public const string ImpersonatedByUserNameClaim = "impersonated_by_user_name";
+
     private readonly IConfiguration _configuration;
 
     public TokenService(IConfiguration configuration)
@@ -16,7 +20,10 @@ public class TokenService
     }
 
     //לאחר כניסת משתמש חוקי- נבדק באמצעות סיסמה JWT יצירת ה
-    public string CreateToken(AppUser user)
+    public string CreateToken(
+        AppUser user,
+        int? impersonatedByUserId = null,
+        string? impersonatedByUserName = null)
     {
         //appsettings- מתוך קובץ ההגדרות JWT הגדות 
         var jwtSection = _configuration.GetSection("Jwt");
@@ -51,7 +58,18 @@ public class TokenService
         {
             claims.Add(new Claim(ClaimTypes.Role, userRole.Role.Name));
         }
-        
+
+        if (impersonatedByUserId.HasValue)
+        {
+            claims.Add(new Claim(IsImpersonatingClaim, "true"));
+            claims.Add(new Claim(ImpersonatedByUserIdClaim, impersonatedByUserId.Value.ToString()));
+
+            if (!string.IsNullOrWhiteSpace(impersonatedByUserName))
+            {
+                claims.Add(new Claim(ImpersonatedByUserNameClaim, impersonatedByUserName));
+            }
+        }
+
         //HASH והאלגוריתם  KEY יצירת החתימה על הטוקן עם ה
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
 

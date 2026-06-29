@@ -31,7 +31,7 @@ export class Products {
       return 'טבלת המוצרים למשתמש';
     }
 
-    return `טבלת המוצרים למשתמש ${currentUser.userId} - ${currentUser.userName}`;
+    return `טבלת המוצרים שלי -  ${currentUser.userName}`;
   }
 
   loadProducts(): void {
