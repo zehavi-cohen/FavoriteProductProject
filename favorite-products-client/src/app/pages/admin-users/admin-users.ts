@@ -1,7 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 import { AdminService } from '../../core/services/admin.service';
+import { AuthService } from '../../core/services/auth.service';
 import { AdminUser } from '../../models/admin-user.model';
 
 @Component({
@@ -13,6 +14,8 @@ import { AdminUser } from '../../models/admin-user.model';
 })
 export class AdminUsers {
   private readonly adminService = inject(AdminService);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
   users = signal<AdminUser[]>([]);
   isLoading = signal(false);
@@ -33,13 +36,33 @@ export class AdminUsers {
       },
       error: error => {
         console.error(error);
-        
-          if (error.status === 401 || error.status === 403) {
-            this.isLoading.set(false);
-            return;
-          }
+
+        if (error.status === 401 || error.status === 403) {
+          this.isLoading.set(false);
+          return;
+        }
+
         this.errorMessage.set('שגיאה בטעינת המשתמשים');
         this.isLoading.set(false);
+      }
+    });
+  }
+
+  loginAsUser(user: AdminUser): void {
+    if (this.isAdmin(user)) {
+      return;
+    }
+
+    this.errorMessage.set(null);
+
+    this.adminService.loginAsUser(user.userId).subscribe({
+      next: response => {
+        this.authService.startImpersonation(response);
+        this.router.navigate(['/products']);
+      },
+      error: error => {
+        console.error(error);
+        this.errorMessage.set('שגיאה בכניסה כמשתמש');
       }
     });
   }

@@ -23,6 +23,19 @@
   </div>
 </header>
 
+@if (auth.isImpersonating()) {
+  <div class="impersonation-floating-banner">
+    <span>
+      מחוברת כמשתמש:
+      {{ auth.currentUser()?.userName }}
+    </span>
+
+    <button type="button" (click)="backToAdmin()">
+      חזרה למנהל
+    </button>
+  </div>
+}
+
 <main>
   <router-outlet />
 </main>

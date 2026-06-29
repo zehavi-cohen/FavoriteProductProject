@@ -2,7 +2,7 @@
   <h1 class="page-title">ניהול משתמשים</h1>
 
   <div class="admin-banner">
-    מסך מנהל — ניתן לצפות במשתמשים ולראות את המוצרים האהובים של כל משתמש.
+    מסך מנהל — ניתן לצפות במשתמשים ולהיכנס כמשתמש רגיל לצורך בדיקה.
   </div>
 
   @if (isLoading()) {
@@ -67,6 +67,15 @@
                     >
                       צפייה במוצרים
                     </a>
+
+                    <button
+                      type="button"
+                      class="btn btn-primary"
+                      (click)="loginAsUser(user)"
+                      [disabled]="isAdmin(user) || !user.isActive"
+                    >
+                      כניסה כמשתמש
+                    </button>
                   </td>
                 </tr>
               }

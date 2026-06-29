@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 
 import { AdminUser } from '../../models/admin-user.model';
 import { Product } from '../../models/product.model';
+import { AuthResponse } from '../../models/auth-response.model';
 
 @Injectable({
   providedIn: 'root'
@@ -13,12 +14,15 @@ export class AdminService {
   constructor(private http: HttpClient) {}
 
   getUsers() {
- return this.http.get<Product[]>(
-      `${this.apiUrl}/api/admin/users//products`
-    );  }
-  // getUsers() {
-  //   return this.http.get<AdminUser[]>(`${this.apiUrl}/api/admin/users`);
-  // }
+    return this.http.get<AdminUser[]>(`${this.apiUrl}/api/admin/users`);
+  }
+
+  loginAsUser(userId: number) {
+    return this.http.post<AuthResponse>(
+      `${this.apiUrl}/api/admin/users/${userId}/login-as`,
+      {}
+    );
+  }
 
   getUserProducts(userId: number) {
     return this.http.get<Product[]>(
