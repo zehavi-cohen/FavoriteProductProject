@@ -1,6 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
-
+import { Router } from '@angular/router';
 import { AdminService } from '../../core/services/admin.service';
 import { AuthService } from '../../core/services/auth.service';
 import { AdminUser } from '../../models/admin-user.model';
@@ -8,7 +7,7 @@ import { AdminUser } from '../../models/admin-user.model';
 @Component({
   selector: 'app-admin-users',
   standalone: true,
-  imports: [RouterLink],
+  imports: [],
   templateUrl: './admin-users.html',
   styleUrl: './admin-users.scss'
 })

@@ -1,5 +1,4 @@
-﻿using backend.DTOs.Products;
-using backend.Extensions;
+﻿using backend.Extensions;
 using backend.Services;
 
 namespace backend.Endpoints;
@@ -16,34 +15,6 @@ public static class AdminEndpoints
             AdminService adminService) =>
         {
             var result = await adminService.GetUsersAsync();
-
-            return ToHttpResult(result);
-        });
-
-        group.MapGet("/users/{userId:int}/products", async (
-            int userId,
-            AdminService adminService) =>
-        {
-            var result = await adminService.GetUserProductsAsync(userId);
-
-            return ToHttpResult(result);
-        });
-
-        group.MapPut("/users/{userId:int}/products/{productId:int}/favorite", async (
-            int userId,
-            int productId,
-            SetFavoriteRequest request,
-            AdminService adminService) =>
-        {
-            var result = await adminService.SetFavoriteForUserAsync(
-                userId,
-                productId,
-                request.IsFavorite);
-
-            if (result.IsSuccess)
-            {
-                return Results.NoContent();
-            }
 
             return ToHttpResult(result);
         });

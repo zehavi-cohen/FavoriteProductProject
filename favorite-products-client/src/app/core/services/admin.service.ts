@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
 import { AdminUser } from '../../models/admin-user.model';
-import { Product } from '../../models/product.model';
 import { AuthResponse } from '../../models/auth-response.model';
 
 @Injectable({
@@ -24,16 +23,4 @@ export class AdminService {
     );
   }
 
-  getUserProducts(userId: number) {
-    return this.http.get<Product[]>(
-      `${this.apiUrl}/api/admin/users/${userId}/products`
-    );
-  }
-
-  setUserFavorite(userId: number, productId: number, isFavorite: boolean) {
-    return this.http.put<void>(
-      `${this.apiUrl}/api/admin/users/${userId}/products/${productId}/favorite`,
-      { isFavorite }
-    );
-  }
 }
