@@ -11,4 +11,10 @@ public class AuthResponse
     public List<string> Roles { get; set; } = new();
 
     public string Token { get; set; } = string.Empty;
+
+    public bool IsImpersonating { get; set; }
+
+    public int? ImpersonatedByUserId { get; set; }
+
+    public string? ImpersonatedByUserName { get; set; }
 }

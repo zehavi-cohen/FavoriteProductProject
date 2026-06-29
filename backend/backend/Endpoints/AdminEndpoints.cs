@@ -1,4 +1,5 @@
 ﻿using backend.DTOs.Products;
+using backend.Extensions;
 using backend.Services;
 
 namespace backend.Endpoints;
@@ -43,6 +44,20 @@ public static class AdminEndpoints
             {
                 return Results.NoContent();
             }
+
+            return ToHttpResult(result);
+        });
+
+        group.MapPost("/users/{userId:int}/login-as", async (
+            int userId,
+            HttpContext httpContext,
+            AdminService adminService) =>
+        {
+            var adminUserId = httpContext.User.GetUserId();
+
+            var result = await adminService.LoginAsUserAsync(
+                userId,
+                adminUserId);
 
             return ToHttpResult(result);
         });

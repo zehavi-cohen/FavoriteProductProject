@@ -1,0 +1,46 @@
+# For more info on HTTP files go to https://aka.ms/vs/httpfile
+@baseUrl = https://localhost:7001
+
+### 1. Login as admin
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "userName": "admin1",
+  "password": "123456"
+}
+
+
+### 2. Paste admin token here after login
+@adminToken = PASTE_ADMIN_TOKEN_HERE
+
+
+### 3. Get users - admin only
+GET {{baseUrl}}/api/admin/users
+Authorization: Bearer {{adminToken}}
+
+
+### 4. Login as selected user
+# Replace 2 with the real userId from the users response
+POST {{baseUrl}}/api/admin/users/2/login-as
+Authorization: Bearer {{adminToken}}
+
+
+### 5. Paste impersonation token here after login-as
+@impersonationToken = PASTE_IMPERSONATION_TOKEN_HERE
+
+
+### 6. Get products as impersonated user
+GET {{baseUrl}}/api/products/my
+Authorization: Bearer {{impersonationToken}}
+
+
+### 7. Optional - update favorite as impersonated user
+# Replace 1 with a real productId
+PUT {{baseUrl}}/api/products/1/favorite
+Authorization: Bearer {{impersonationToken}}
+Content-Type: application/json
+
+{
+  "isFavorite": true
+}
