@@ -52,7 +52,6 @@ public class TokenService
             claims.Add(new Claim(ClaimTypes.Role, userRole.Role.Name));
         }
         
-
         //HASH והאלגוריתם  KEY יצירת החתימה על הטוקן עם ה
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
 

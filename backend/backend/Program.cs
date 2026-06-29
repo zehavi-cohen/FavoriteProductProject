@@ -75,6 +75,7 @@ builder.Services
             ClockSkew = TimeSpan.Zero
         };
     });
+
 //Authorization
 builder.Services.AddAuthorization(options =>
 {
