@@ -1,21 +1,19 @@
 <section class="page">
-  <h1 class="page-title">המוצרים שלי</h1>
-
-  @if (isLoading()) {
+  @if (store.isLoading()) {
     <div class="card">
       טוען מוצרים...
     </div>
   } @else {
-    @if (errorMessage()) {
+    @if (store.errorMessage()) {
       <div class="error-message">
-        {{ errorMessage() }}
+        {{ store.errorMessage() }}
       </div>
     }
 
-    <app-products-table
-      [title]="getTableTitle()"
-      [products]="products()"
-      (favoriteChanged)="toggleFavorite($event.product, $event.isFavorite)"
-    />
+   <app-products-table
+    [products]="store.products()"
+    (favoriteChanged)="store.toggleFavorite($event.product, $event.isFavorite)"
+  />
+
   }
 </section>

@@ -12,7 +12,6 @@ type ProductsFilter = 'all' | 'favorites' | 'notFavorites';
   styleUrl: './products-table.scss'
 })
 export class ProductsTable {
-  title = input.required<string>();
   products = input.required<Product[]>();
 
   searchText = signal('');

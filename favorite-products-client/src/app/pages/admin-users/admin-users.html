@@ -1,23 +1,17 @@
 <section class="page">
-  <h1 class="page-title">ניהול משתמשים</h1>
-
-  <div class="admin-banner">
-    מסך מנהל — ניתן לצפות במשתמשים ולהיכנס כמשתמש רגיל לצורך בדיקה.
-  </div>
-
-  @if (isLoading()) {
+  @if (store.isLoading()) {
     <div class="card">
       טוען משתמשים...
     </div>
   } @else {
-    @if (errorMessage()) {
+    @if (store.errorMessage()) {
       <div class="error-message">
-        {{ errorMessage() }}
+        {{ store.errorMessage() }}
       </div>
     }
 
     <div class="card">
-      @if (users().length === 0) {
+      @if (store.users().length === 0) {
         <div class="empty-state">
           לא נמצאו משתמשים להצגה
         </div>
@@ -36,35 +30,31 @@
             </thead>
 
             <tbody>
-              @for (user of users(); track user.userId) {
+              @for (user of store.users(); track user.userId) {
                 <tr>
                   <td>{{ user.userId }}</td>
                   <td>{{ user.userName }}</td>
                   <td>{{ user.email }}</td>
-                  <td>
-                    @if (isAdmin(user)) {
-                      <span class="badge badge-admin">
-                        {{ getRolesText(user) }}
-                      </span>
-                    } @else {
-                      <span class="badge badge-user">
-                        {{ getRolesText(user) }}
-                      </span>
-                    }
-                  </td>
-                  <td>
+                  <td class="roles-cell">
+  {{ store.getRolesText(user) }}
+</td>
+                 <td>
                     @if (user.isActive) {
-                      פעיל
+                      <span class="status-badge status-active">
+                        פעיל
+                      </span>
                     } @else {
-                      לא פעיל
+                      <span class="status-badge status-inactive">
+                        לא פעיל
+                      </span>
                     }
                   </td>
                   <td>
                     <button
                       type="button"
                       class="btn btn-primary"
-                      (click)="loginAsUser(user)"
-                      [disabled]="isAdmin(user) || !user.isActive"
+                      (click)="store.loginAsUser(user)"
+                      [disabled]="store.isAdmin(user) || !user.isActive"
                     >
                       כניסה כמשתמש
                     </button>

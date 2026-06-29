@@ -1,99 +1,91 @@
-.products-table-title {
-  margin: 0 0 18px;
-  padding-bottom: 14px;
-
-  border-bottom: 1px solid #e5e7eb;
-
-  font-size: 22px;
-  font-weight: 700;
-  color: #1f2937;
-}
-
 .products-summary {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 18px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
 .summary-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+  position: relative;
+  overflow: hidden;
 
-  padding: 8px 14px;
-  border-radius: 999px;
+  padding: 18px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #eef2ff, #ecfeff);
+  border: 1px solid #dbeafe;
+}
 
-  background: #f1f5f9;
-  color: #334155;
-  font-size: 14px;
+.summary-item::after {
+  content: '';
+  position: absolute;
+  left: -24px;
+  top: -24px;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: rgba(79, 70, 229, 0.12);
 }
 
 .summary-label {
-  font-weight: 600;
+  display: block;
+  margin-bottom: 8px;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 800;
 }
 
 .summary-value {
-  font-weight: 700;
-  color: #1e40af;
+  color: #312e81;
+  font-size: 28px;
+  font-weight: 950;
 }
 
 .products-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 14px;
-
-  margin-bottom: 18px;
+  display: grid;
+  grid-template-columns: 1fr 220px auto;
+  align-items: end;
+  gap: 16px;
+  margin-bottom: 24px;
   padding: 16px;
-
-  background: #f8fafc;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
+  border-radius: 18px;
+  background: #f8fbff;
+  border: 1px solid #e2e8f0;
 }
 
 .search-box,
 .filter-box {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-}
-
-.search-box {
-  min-width: 260px;
-  flex: 1;
-}
-
-.search-box label,
-.filter-box label {
-  font-weight: 600;
-  color: #334155;
-}
-
-.search-box input,
-.filter-box select {
-  height: 40px;
-  padding: 0 12px;
-
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-
-  background: #ffffff;
-  font-size: 14px;
-}
-
-.search-box input:focus,
-.filter-box select:focus {
-  outline: none;
-  border-color: #2563eb;
+  gap: 8px;
 }
 
 .clear-btn {
-  height: 40px;
+  height: 43px;
+  white-space: nowrap;
 }
 
-input[type='checkbox'] {
-  width: 18px;
-  height: 18px;
+.checkbox-cell {
+  text-align: center;
+  width: 120px;
+}
+
+.checkbox-cell input {
+  width: 19px;
+  height: 19px;
   cursor: pointer;
+  accent-color: #4f46e5;
+}
+
+@media (max-width: 800px) {
+  .products-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .products-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .clear-btn {
+    width: 100%;
+  }
 }

@@ -12,6 +12,41 @@
           <a routerLink="/admin/users">ניהול משתמשים</a>
         }
 
+        <div class="current-user-box">
+          @if (auth.isImpersonating()) {
+            <span class="current-user-box__label">מחוברת כ:</span>
+            <span class="current-user-box__name">
+              {{ auth.currentUser()?.userName }}
+            </span>
+
+            <span class="current-user-box__separator">|</span>
+
+            <span class="current-user-box__label">מנהל:</span>
+            <span class="current-user-box__admin">
+              {{ auth.currentUser()?.impersonatedByUserName }}
+            </span>
+
+            <button
+              type="button"
+              class="back-to-admin-btn"
+              (click)="backToAdmin()"
+            >
+              חזרה למנהל
+            </button>
+          } @else {
+            <span class="current-user-box__label">מחוברת כ:</span>
+            <span class="current-user-box__name">
+              {{ auth.currentUser()?.userName }}
+            </span>
+
+            @if (auth.isAdmin()) {
+              <span class="current-user-box__role">
+                מנהל
+              </span>
+            }
+          }
+        </div>
+
         <button type="button" class="logout-btn" (click)="logout()">
           יציאה
         </button>
@@ -22,19 +57,6 @@
     </nav>
   </div>
 </header>
-
-@if (auth.isImpersonating()) {
-  <div class="impersonation-floating-banner">
-    <span>
-      מחוברת כמשתמש:
-      {{ auth.currentUser()?.userName }}
-    </span>
-
-    <button type="button" (click)="backToAdmin()">
-      חזרה למנהל
-    </button>
-  </div>
-}
 
 <main>
   <router-outlet />
