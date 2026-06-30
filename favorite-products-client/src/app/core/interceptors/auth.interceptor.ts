@@ -3,20 +3,20 @@ import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 
-import { AuthService } from '../services/auth.service';
+import { AuthStore } from '../stores/auth.store';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const authService = inject(AuthService);
+  const authStore = inject(AuthStore);
   const router = inject(Router);
 
-  const token = authService.getToken();
+  const token = authStore.token();
 
   const isAuthRequest =
     req.url.includes('/api/auth/login') ||
     req.url.includes('/api/auth/register');
 
   if (token && !isValidJwtFormat(token) && !isAuthRequest) {
-    authService.logout();
+    authStore.logout();
 
     queueMicrotask(() => {
       router.navigate(['/login'], {
@@ -46,7 +46,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       }
 
       if (error.status === 401) {
-        authService.logout();
+        authStore.logout();
 
         queueMicrotask(() => {
           router.navigate(['/login'], {

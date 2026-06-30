@@ -8,7 +8,7 @@ import {
 import { Router } from '@angular/router';
 
 import { AdminService } from '../../core/services/admin.service';
-import { AuthService } from '../../core/services/auth.service';
+import { AuthStore } from '../../core/stores/auth.store';
 import { AdminUser } from '../../models/admin-user.model';
 
 type AdminUsersState = {
@@ -28,7 +28,7 @@ export const AdminUsersStore = signalStore(
 
   withMethods(store => {
     const adminService = inject(AdminService);
-    const authService = inject(AuthService);
+    const authStore  = inject(AuthStore);
     const router = inject(Router);
 
     return {
@@ -70,8 +70,8 @@ export const AdminUsersStore = signalStore(
 
         adminService.loginAsUser(user.userId).subscribe({
           next: response => {
-            authService.startImpersonation(response);
-            router.navigate(['/products']);
+          authStore.startImpersonation(response);
+          router.navigate(['/products']);
           },
           error: error => {
             console.error(error);

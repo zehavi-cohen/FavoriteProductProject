@@ -5,7 +5,7 @@ import { adminGuard } from './core/guards/admin.guard';
 
 import { Login } from './pages/login/login';
 import { Register } from './pages/register/register';
-import { Products } from './pages/products/products';
+import { Products } from './pages/products/products/products';
 import { AdminUsers } from './pages/admin-users/admin-users';
 
 export const routes: Routes = [

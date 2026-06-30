@@ -1,0 +1,158 @@
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+
+  background: rgba(255, 255, 255, 0.88);
+  border-bottom: 1px solid rgba(219, 228, 240, 0.9);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  backdrop-filter: blur(14px);
+}
+
+.app-header__inner {
+  max-width: 1120px;
+  min-height: 68px;
+  margin: 0 auto;
+  padding: 0 24px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.app-logo {
+  font-size: 21px;
+  font-weight: 900;
+  color: #3730a3;
+  white-space: nowrap;
+}
+
+.app-logo::before {
+  content: '★';
+  margin-left: 8px;
+  color: #06b6d4;
+}
+
+.app-nav {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.app-nav a {
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-weight: 800;
+  color: #334155;
+  transition: 0.15s ease;
+}
+
+.app-nav a:hover {
+  background: #eef2ff;
+  color: #4338ca;
+}
+
+.current-user-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 7px 13px;
+  border: 1px solid #c7d2fe;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ffffff, #eef2ff);
+  color: #1f2937;
+
+  font-size: 14px;
+  white-space: nowrap;
+  box-shadow: 0 8px 18px rgba(79, 70, 229, 0.1);
+}
+
+.current-user-box__label {
+  color: #64748b;
+  font-weight: 700;
+}
+
+.current-user-box__name {
+  font-weight: 900;
+  color: #312e81;
+}
+
+.current-user-box__admin {
+  font-weight: 900;
+  color: #c2410c;
+}
+
+.current-user-box__separator {
+  color: #cbd5e1;
+}
+
+.current-user-box__role {
+  margin-inline-start: 4px;
+  padding: 3px 9px;
+  border-radius: 999px;
+
+  background: #ecfeff;
+  color: #0e7490;
+
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.back-to-admin-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 6px 11px;
+  cursor: pointer;
+
+  background: #312e81;
+  color: white;
+  font-weight: 800;
+  transition: 0.15s ease;
+}
+
+.back-to-admin-btn:hover {
+  background: #4338ca;
+}
+
+.logout-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 9px 15px;
+  cursor: pointer;
+
+  background: #fff1f2;
+  color: #be123c;
+  border: 1px solid #fecdd3;
+
+  font-weight: 900;
+  transition: 0.15s ease;
+}
+
+.logout-btn:hover {
+  background: #ffe4e6;
+}
+
+@media (max-width: 800px) {
+  .app-header__inner {
+    padding: 14px 16px;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .app-nav {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 10px;
+  }
+
+  .current-user-box {
+    border-radius: 16px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    white-space: normal;
+  }
+}

@@ -2,6 +2,7 @@ import { inject } from '@angular/core';
 import {
   patchState,
   signalStore,
+  withHooks,
   withMethods,
   withState
 } from '@ngrx/signals';
@@ -26,7 +27,7 @@ export const ProductsStore = signalStore(
 
   withMethods(store => {
     const productService = inject(ProductService);
-
+            
     return {
       loadProducts(): void {
         patchState(store, {
@@ -87,5 +88,10 @@ export const ProductsStore = signalStore(
         });
       }
     };
-  })
+  }),
+  withHooks(store => ({
+    onInit(){
+      console.log("on init products store ")
+    }
+  }))
 );

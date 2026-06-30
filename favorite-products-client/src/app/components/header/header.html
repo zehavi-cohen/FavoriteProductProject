@@ -1,0 +1,62 @@
+<header class="app-header">
+  <div class="app-header__inner">
+    <a routerLink="/products" class="app-logo">
+      מוצרים אהובים
+    </a>
+
+    <nav class="app-nav">
+      @if (authStore.currentUser()) {
+        <a routerLink="/products">המוצרים שלי</a>
+
+        @if (authStore.isAdmin()) {
+          <a routerLink="/admin/users">ניהול משתמשים</a>
+        }
+
+        <div class="current-user-box">
+          @if (authStore.isImpersonating()) {
+            <span class="current-user-box__label">מחוברת כ:</span>
+
+            <span class="current-user-box__name">
+              {{ authStore.currentUser()?.userName }}
+            </span>
+
+            <span class="current-user-box__separator">|</span>
+
+            <span class="current-user-box__label">מנהל:</span>
+
+            <span class="current-user-box__admin">
+              {{ authStore.currentUser()?.impersonatedByUserName }}
+            </span>
+
+            <button
+              type="button"
+              class="back-to-admin-btn"
+              (click)="backToAdmin()"
+            >
+              חזרה למנהל
+            </button>
+          } @else {
+            <span class="current-user-box__label">מחוברת כ:</span>
+
+            <span class="current-user-box__name">
+              {{ authStore.currentUser()?.userName }}
+            </span>
+
+            @if (authStore.isAdmin()) {
+              <span class="current-user-box__role">
+                מנהל
+              </span>
+            }
+          }
+        </div>
+
+        <button type="button" class="logout-btn" (click)="logout()">
+          יציאה
+        </button>
+      } @else {
+        <a routerLink="/login">כניסה</a>
+        <a routerLink="/register">הרשמה</a>
+      }
+    </nav>
+  </div>
+</header>

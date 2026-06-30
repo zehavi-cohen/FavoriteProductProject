@@ -1,37 +1,26 @@
 <section class="page">
   <div class="card form-card">
-    <h1 class="form-title">כניסה למערכת</h1>
+    <h1 class="form-title">כניסה</h1>
 
     <form [formGroup]="form" (ngSubmit)="submit()">
-      <div class="form-field">
-        <label>שם משתמש או אימייל</label>
-        <input
-          type="text"
-          formControlName="userNameOrEmail"
-          autocomplete="username"
-        />
+      <app-form-input
+        label="שם משתמש או אימייל"
+        autocomplete="username"
+        formControlName="userNameOrEmail"
+        errorText="שדה חובה"
+      />
 
-        @if (form.controls.userNameOrEmail.touched && form.controls.userNameOrEmail.invalid) {
-          <div class="error-message">שדה חובה</div>
-        }
-      </div>
+      <app-form-input
+        label="סיסמה"
+        type="password"
+        autocomplete="current-password"
+        formControlName="password"
+        errorText="שדה חובה"
+      />
 
-      <div class="form-field">
-        <label>סיסמה</label>
-        <input
-          type="password"
-          formControlName="password"
-          autocomplete="current-password"
-        />
-
-        @if (form.controls.password.touched && form.controls.password.invalid) {
-          <div class="error-message">שדה חובה</div>
-        }
-      </div>
-
-      @if (errorMessage()) {
+      @if (authStore.error()) {
         <div class="error-message">
-          {{ errorMessage() }}
+          {{ authStore.error() }}
         </div>
       }
 
@@ -39,9 +28,9 @@
         <button
           type="submit"
           class="btn btn-primary"
-          [disabled]="isLoading()"
+          [disabled]="authStore.isLoading()"
         >
-          @if (isLoading()) {
+          @if (authStore.isLoading()) {
             מתחבר...
           } @else {
             כניסה

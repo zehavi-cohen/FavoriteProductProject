@@ -1,8 +1,7 @@
 import { Component, inject } from '@angular/core';
 
 import { ProductsTable } from '../products-table/products-table';
-import { ProductsStore } from './products.store';
-
+import { ProductsStore } from '../products.store';
 @Component({
   selector: 'app-products',
   standalone: true,

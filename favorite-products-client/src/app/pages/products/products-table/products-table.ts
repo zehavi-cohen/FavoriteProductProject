@@ -1,6 +1,6 @@
 import { Component, computed, input, output, signal } from '@angular/core';
 
-import { Product } from '../../models/product.model';
+import { Product } from '../../../models/product.model';
 
 type ProductsFilter = 'all' | 'favorites' | 'notFavorites';
 

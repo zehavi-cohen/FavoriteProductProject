@@ -9,11 +9,9 @@
         {{ store.errorMessage() }}
       </div>
     }
-
    <app-products-table
     [products]="store.products()"
     (favoriteChanged)="store.toggleFavorite($event.product, $event.isFavorite)"
   />
-
   }
 </section>
