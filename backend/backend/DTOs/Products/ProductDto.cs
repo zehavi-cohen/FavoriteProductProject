@@ -1,14 +1,14 @@
 ﻿namespace backend.DTOs.Products;
 
-public class ProductDto
-{
-    public int ProductId { get; set; }
+public sealed record ProductDto
+(
+     int ProductId,
 
-    public string ProductName { get; set; } = string.Empty;
+     string ProductName,
 
-    public string? Code { get; set; }
+     string? Code,
 
-    public string? Description { get; set; }
+     string? Description,
 
-    public bool IsFavorite { get; set; }
-}
+     bool IsFavorite
+);

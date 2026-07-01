@@ -26,15 +26,15 @@ public class AdminService
                 .ThenInclude(x => x.Role)
             .OrderBy(x => x.UserName)
             .Select(x => new AdminUserDto
-            {
-                UserId = x.Id,
-                UserName = x.UserName,
-                Email = x.Email,
-                IsActive = x.IsActive,
-                Roles = x.UserRoles
+            (
+                UserId : x.Id,
+                UserName : x.UserName,
+                Email : x.Email,
+                IsActive : x.IsActive,
+                Roles : x.UserRoles
                     .Select(ur => ur.Role.Name)
                     .ToList()
-            })
+            ))
             .ToListAsync();
     }
 
@@ -91,18 +91,18 @@ public class AdminService
             adminUser.UserName);
 
         var response = new AuthResponse
-        {
-            UserId = targetUser.Id,
-            UserName = targetUser.UserName,
-            Email = targetUser.Email,
-            Roles = targetUser.UserRoles
+        (
+            UserId: targetUser.Id,
+            UserName: targetUser.UserName,
+            Email: targetUser.Email,
+            Roles : targetUser.UserRoles
                 .Select(x => x.Role.Name)
                 .ToList(),
-            Token = token,
-            IsImpersonating = true,
-            ImpersonatedByUserId = adminUser.Id,
-            ImpersonatedByUserName = adminUser.UserName
-        };
+            Token: token,
+            IsImpersonating: true,
+            ImpersonatedByUserId: adminUser.Id,
+            ImpersonatedByUserName: adminUser.UserName
+        );
 
         return new LoginAsUserResult(
             LoginAsUserStatus.Success,

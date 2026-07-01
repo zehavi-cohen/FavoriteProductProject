@@ -1,13 +1,16 @@
-﻿using System.Text;
-using backend.Data;
+﻿using backend.Data;
 using backend.Entities;
 using backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace backend.Extensions;
+
+using backend.Authorization;
+using backend.Middlewares;
 
 public static class ApplicationServiceExtensions
 {
@@ -117,10 +120,8 @@ public static class ApplicationServiceExtensions
     {
         services.AddAuthorization(options =>
         {
-            options.AddPolicy("AdminOnly", policy =>
-            {
-                policy.RequireRole("Admin");
-            });
+            options.AddPolicy(AuthorizationPolicies.AdminOnly, policy =>
+                policy.RequireRole(AppRoles.Admin));
         });
 
         return services;
@@ -133,5 +134,11 @@ public static class ApplicationServiceExtensions
         services.AddSwaggerGen();
 
         return services;
+    }
+
+    public static IApplicationBuilder UseCurrentUser(
+    this IApplicationBuilder app)
+    {
+        return app.UseMiddleware<CurrentUserMiddleware>();
     }
 }

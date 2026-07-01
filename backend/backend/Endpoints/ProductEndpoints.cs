@@ -26,7 +26,7 @@ public static class ProductEndpoints
     {
         var userId = httpContext.User.GetUserId();
 
-        var products = await productService.GetProductsForUserAsync(userId);
+        var products = await productService.GetProductsForUserAsync();
 
         return TypedResults.Ok(products);
     }

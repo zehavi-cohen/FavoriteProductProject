@@ -1,4 +1,5 @@
-﻿using backend.DTOs.Admin;
+﻿using backend.Contexts.CurrentUser;
+using backend.DTOs.Admin;
 using backend.DTOs.Auth;
 using backend.Extensions;
 using backend.Services;
@@ -12,7 +13,7 @@ public static class AdminEndpoints
     {
         var group = app.MapGroup("/api/admin")
             .WithTags("Admin")
-            .RequireAuthorization("AdminOnly");
+            .RequireAdmin();
 
         group.MapGet("/users", GetUsersAsync);
 
@@ -31,15 +32,15 @@ public static class AdminEndpoints
 
     private static async Task<Results<Ok<AuthResponse>, BadRequest<string>, UnauthorizedHttpResult, NotFound<string>, ProblemHttpResult>> LoginAsUserAsync(
         int userId,
-        HttpContext httpContext,
+        ICurrentUserContext currentUser,
         AdminService adminService)
     {
-        var adminUserId = httpContext.User.GetUserId();
+        var adminUserId = currentUser.GetRequiredUserId();
 
         var result = await adminService.LoginAsUserAsync(
             userId,
             adminUserId);
-
+        
         return result.Status switch
         {
             LoginAsUserStatus.Success when result.AuthResponse != null =>

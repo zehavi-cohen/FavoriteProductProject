@@ -1,5 +1,8 @@
 ﻿using backend.Endpoints;
 using backend.Extensions;
+using backend.Validators.Auth;
+using FluentValidation;
+using backend.Contexts.CurrentUser;
 
 //יצירת אובייקט השירותים של האפלקצייה שתבנה בהמשך
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +22,14 @@ builder.Services.AddApplicationAuthentication(builder.Configuration);
 //Authorization
 builder.Services.AddApplicationAuthorization();
 
+// הגדרות חיבור לולידציות
+builder.Services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();
+
+//הגדרות הנתונים לקונטקסט
+builder.Services.AddScoped<CurrentUserContext>();
+
+builder.Services.AddScoped<ICurrentUserContext>(serviceProvider =>
+    serviceProvider.GetRequiredService<CurrentUserContext>());
 //swagger
 builder.Services.AddApplicationSwagger();
 
@@ -32,6 +43,7 @@ app.UseSwaggerUI();
 app.UseCors(ApplicationServiceExtensions.AngularClientCorsPolicy);
 
 app.UseAuthentication();
+app.UseCurrentUser();
 app.UseAuthorization();
 
 // Endpoints- מיפוי ה 

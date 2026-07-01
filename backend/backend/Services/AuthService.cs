@@ -31,8 +31,16 @@ public class AuthService
             x.Email == email);
     }
 
-    public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
+    public async Task<AuthResponse?> RegisterAsync(RegisterRequest request)
     {
+        var userExists = await _db.AppUsers.AnyAsync(x =>
+        x.UserName == request.UserName ||
+        x.Email == request.Email);
+
+            if (userExists)
+            {
+                return null;
+            }
         var userRole = await _db.Roles
             .FirstOrDefaultAsync(x => x.Name == "User");
 
@@ -108,14 +116,14 @@ public class AuthService
         var token = _tokenService.CreateToken(user);
 
         return new AuthResponse
-        {
-            UserId = user.Id,
-            UserName = user.UserName,
-            Email = user.Email,
-            Roles = user.UserRoles
+        (
+            UserId : user.Id,
+            UserName : user.UserName,
+            Email : user.Email,
+            Roles : user.UserRoles
                 .Select(x => x.Role.Name)
                 .ToList(),
-            Token = token
-        };
+            Token: token
+        );
     }
 }

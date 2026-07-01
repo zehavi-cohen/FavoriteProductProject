@@ -1,6 +1,7 @@
 ﻿using backend.Data;
 using backend.DTOs.Products;
 using backend.Entities;
+using backend.Contexts.CurrentUser;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Services;
@@ -8,27 +9,30 @@ namespace backend.Services;
 public class ProductService
 {
     private readonly AppDbContext _db;
+    private readonly ICurrentUserContext _currentUser;
 
-    public ProductService(AppDbContext db)
+    public ProductService(AppDbContext db, ICurrentUserContext currentUser)
     {
         _db = db;
+        _currentUser = currentUser;
     }
 
-    public async Task<List<ProductDto>> GetProductsForUserAsync(int userId)
+    public async Task<List<ProductDto>> GetProductsForUserAsync()
     {
+        var userId = _currentUser.GetRequiredUserId();
         var products = await _db.Products
             .Where(p => p.IsActive)
+            .OrderBy(p => p.Name)
             .Select(p => new ProductDto
-            {
-                ProductId = p.Id,
-                ProductName = p.Name,
-                Code = p.Code,
-                Description = p.Description,
-                IsFavorite = _db.UserFavoriteProducts.Any(ufp =>
+            (
+                ProductId : p.Id,
+                ProductName : p.Name,
+                Code: p.Code,
+                Description: p.Description,
+                IsFavorite : _db.UserFavoriteProducts.Any(ufp =>
                     ufp.UserId == userId &&
                     ufp.ProductId == p.Id)
-            })
-            .OrderBy(p => p.ProductName)
+            ))
             .ToListAsync();
 
         return products;

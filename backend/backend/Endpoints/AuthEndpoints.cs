@@ -1,5 +1,7 @@
 ﻿using backend.DTOs.Auth;
+using backend.Extensions;
 using backend.Services;
+using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace backend.Endpoints;
@@ -18,37 +20,28 @@ public static class AuthEndpoints
         return app;
     }
 
-    private static async Task<Results<Ok<AuthResponse>, BadRequest<string>, ProblemHttpResult>> RegisterAsync(
-        RegisterRequest request,
-        AuthService authService)
+    private static async Task<Results<Ok<AuthResponse>, ValidationProblem, BadRequest<string>, ProblemHttpResult>> RegisterAsync(
+    RegisterRequest request,
+    IValidator<RegisterRequest> validator,
+    AuthService authService)
     {
-        if (string.IsNullOrWhiteSpace(request.UserName))
-        {
-            return TypedResults.BadRequest("User name is required.");
-        }
+        var validationResult = await validator.ValidateAsync(request);
 
-        if (string.IsNullOrWhiteSpace(request.Email))
+        if (!validationResult.IsValid)
         {
-            return TypedResults.BadRequest("Email is required.");
-        }
-
-        if (string.IsNullOrWhiteSpace(request.Password))
-        {
-            return TypedResults.BadRequest("Password is required.");
-        }
-
-        var userExists = await authService.UserExistsAsync(
-            request.UserName,
-            request.Email);
-
-        if (userExists)
-        {
-            return TypedResults.BadRequest("User name or email already exists.");
+            return TypedResults.ValidationProblem(
+                validationResult.ToValidationProblemDictionary()
+            );
         }
 
         try
         {
             var response = await authService.RegisterAsync(request);
+
+            if (response is null)
+            {
+                return TypedResults.BadRequest("User name or email already exists.");
+            }
 
             return TypedResults.Ok(response);
         }
@@ -58,18 +51,18 @@ public static class AuthEndpoints
         }
     }
 
-    private static async Task<Results<Ok<AuthResponse>, BadRequest<string>, UnauthorizedHttpResult>> LoginAsync(
+    private static async Task<Results<Ok<AuthResponse>, ValidationProblem, UnauthorizedHttpResult>> LoginAsync(
         LoginRequest request,
+        IValidator<LoginRequest> validator,
         AuthService authService)
     {
-        if (string.IsNullOrWhiteSpace(request.UserNameOrEmail))
-        {
-            return TypedResults.BadRequest("User name or email is required.");
-        }
+        var validationResult = await validator.ValidateAsync(request);
 
-        if (string.IsNullOrWhiteSpace(request.Password))
+        if (!validationResult.IsValid)
         {
-            return TypedResults.BadRequest("Password is required.");
+            return TypedResults.ValidationProblem(
+                validationResult.ToValidationProblemDictionary()
+            );
         }
 
         var response = await authService.LoginAsync(request);
