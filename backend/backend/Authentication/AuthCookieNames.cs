@@ -1,6 +1,6 @@
-﻿namespace backend.Authentication
+﻿namespace backend.Authentication;
+
+public static class AuthCookieNames
 {
-    public class AuthCookieNames
-    {
-    }
+    public const string AccessToken = "favorite_products_access_token";
 }

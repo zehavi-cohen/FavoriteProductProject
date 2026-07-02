@@ -9,8 +9,8 @@ using System.Text;
 
 namespace backend.Extensions;
 
+using backend.Authentication;
 using backend.Authorization;
-using backend.Middlewares;
 
 public static class ApplicationServiceExtensions
 {
@@ -62,7 +62,8 @@ public static class ApplicationServiceExtensions
                 policy
                     .WithOrigins(allowedOrigins)
                     .AllowAnyHeader()
-                    .AllowAnyMethod();
+                    .AllowAnyMethod()
+                    .AllowCredentials();
             });
         });
 
@@ -110,6 +111,24 @@ public static class ApplicationServiceExtensions
 
                     ClockSkew = TimeSpan.Zero
                 };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        if (context.Request.Cookies.TryGetValue(
+                                AuthCookieNames.AccessToken,
+                                out var accessToken))
+                        {
+                            context.Token = accessToken;
+                            return Task.CompletedTask;
+                        }
+
+                        context.NoResult();
+
+                        return Task.CompletedTask;
+                    }
+                };
             });
 
         return services;
@@ -136,9 +155,5 @@ public static class ApplicationServiceExtensions
         return services;
     }
 
-    public static IApplicationBuilder UseCurrentUser(
-    this IApplicationBuilder app)
-    {
-        return app.UseMiddleware<CurrentUserMiddleware>();
-    }
+
 }

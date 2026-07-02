@@ -1,6 +1,5 @@
 import { Component, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-
 import { AuthStore } from '../../core/stores/auth.store';
 
 @Component({
@@ -15,15 +14,22 @@ export class Header {
   private readonly router = inject(Router);
 
   logout(): void {
-    this.authStore.logout();
-    this.router.navigate(['/login']);
+    this.authStore.logout().subscribe({
+      complete: () => {
+        this.router.navigate(['/login'], {
+          replaceUrl: true
+        });
+      }
+    });
   }
 
   backToAdmin(): void {
-    const restored = this.authStore.stopImpersonation();
-
-    if (restored) {
-      this.router.navigate(['/admin/users']);
-    }
+    this.authStore.stopImpersonation().subscribe({
+      next: () => {
+        this.router.navigate(['/admin/users'], {
+          replaceUrl: true
+        });
+      }
+    });
   }
 }

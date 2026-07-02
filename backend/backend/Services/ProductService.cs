@@ -17,7 +17,7 @@ public class ProductService
         _currentUser = currentUser;
     }
 
-    public async Task<List<ProductDto>> GetProductsForUserAsync()
+    public async Task<List<ProductDto>> GetMyProductsAsync()
     {
         var userId = _currentUser.GetRequiredUserId();
         var products = await _db.Products
@@ -38,8 +38,9 @@ public class ProductService
         return products;
     }
 
-    public async Task<bool> SetFavoriteAsync(int userId, int productId, bool isFavorite)
+    public async Task<bool> SetFavoriteAsync(int productId, bool isFavorite)
     {
+        var userId = _currentUser.GetRequiredUserId();
         var productExists = await _db.Products
             .AnyAsync(p => p.Id == productId && p.IsActive);
 

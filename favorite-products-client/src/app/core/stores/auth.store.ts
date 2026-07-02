@@ -12,36 +12,14 @@ import { AuthResponse } from '../../models/auth-response.model';
 import { LoginRequest } from '../../models/login-request.model';
 import { AuthApiService } from '../services/auth-api.service';
 
-const authStorageKey = 'favorite_products_auth';
-const originalAdminStorageKey = 'favorite_products_original_admin_auth';
-
 type AuthState = {
   currentUser: AuthResponse | null;
   isLoading: boolean;
   error: string | null;
 };
 
-function readAuthFromStorage(): AuthResponse | null {
-  const authJson = localStorage.getItem(authStorageKey);
-
-  if (!authJson) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(authJson) as AuthResponse;
-  } catch {
-    localStorage.removeItem(authStorageKey);
-    return null;
-  }
-}
-
-function saveAuthToStorage(response: AuthResponse): void {
-  localStorage.setItem(authStorageKey, JSON.stringify(response));
-}
-
 const initialState: AuthState = {
-  currentUser: readAuthFromStorage(),
+  currentUser: null,
   isLoading: false,
   error: null
 };
@@ -54,8 +32,6 @@ export const AuthStore = signalStore(
   withComputed(store => ({
     isLoggedIn: computed(() => !!store.currentUser()),
 
-    token: computed(() => store.currentUser()?.token ?? null),
-
     isAdmin: computed(() =>
       store.currentUser()?.roles?.includes('Admin') ?? false
     ),
@@ -66,11 +42,17 @@ export const AuthStore = signalStore(
   })),
 
   withMethods((store, authApiService = inject(AuthApiService)) => {
-    const applyAuth = (response: AuthResponse): void => {
-      saveAuthToStorage(response);
-
+    const setCurrentUser = (response: AuthResponse): void => {
       patchState(store, {
         currentUser: response,
+        isLoading: false,
+        error: null
+      });
+    };
+
+    const clearAuth = (): void => {
+      patchState(store, {
+        currentUser: null,
         isLoading: false,
         error: null
       });
@@ -85,7 +67,7 @@ export const AuthStore = signalStore(
 
         return authApiService.login(request).pipe(
           tap(response => {
-            applyAuth(response);
+            setCurrentUser(response);
           }),
           catchError(error => {
             console.error(error);
@@ -100,8 +82,50 @@ export const AuthStore = signalStore(
         );
       },
 
+      loadCurrentUser(): Observable<AuthResponse> {
+        patchState(store, {
+          isLoading: true,
+          error: null
+        });
+
+        return authApiService.me().pipe(
+          tap(response => {
+            setCurrentUser(response);
+          }),
+          catchError(() => {
+            clearAuth();
+
+            return EMPTY;
+          })
+        );
+      },
+
+      logout(): Observable<void> {
+        patchState(store, {
+          isLoading: true,
+          error: null
+        });
+
+        return authApiService.logout().pipe(
+          tap(() => {
+            clearAuth();
+          }),
+          catchError(error => {
+            console.error(error);
+
+            clearAuth();
+
+            return EMPTY;
+          })
+        );
+      },
+
+      clearAuth(): void {
+        clearAuth();
+      },
+
       setAuth(response: AuthResponse): void {
-        applyAuth(response);
+        setCurrentUser(response);
       },
 
       clearError(): void {
@@ -110,49 +134,33 @@ export const AuthStore = signalStore(
         });
       },
 
-      logout(): void {
-        localStorage.removeItem(authStorageKey);
-        localStorage.removeItem(originalAdminStorageKey);
+      startImpersonation(response: AuthResponse): void {
+        setCurrentUser(response);
+      },
 
+      stopImpersonation(): Observable<AuthResponse> {
         patchState(store, {
-          currentUser: null,
-          isLoading: false,
+          isLoading: true,
           error: null
         });
-      },
 
-      startImpersonation(response: AuthResponse): void {
-        const currentAdmin = store.currentUser();
+        return authApiService.stopImpersonation().pipe(
+          tap(response => {
+            setCurrentUser(response);
+          }),
+          catchError(error => {
+            console.error(error);
 
-        if (currentAdmin) {
-          localStorage.setItem(
-            originalAdminStorageKey,
-            JSON.stringify(currentAdmin)
-          );
-        }
+            patchState(store, {
+              isLoading: false,
+              error: 'לא ניתן לחזור למשתמש המקורי'
+            });
 
-        applyAuth(response);
-      },
-
-      stopImpersonation(): boolean {
-        const originalAdminJson = localStorage.getItem(originalAdminStorageKey);
-
-        if (!originalAdminJson) {
-          return false;
-        }
-
-        try {
-          const originalAdmin = JSON.parse(originalAdminJson) as AuthResponse;
-
-          localStorage.removeItem(originalAdminStorageKey);
-          applyAuth(originalAdmin);
-
-          return true;
-        } catch {
-          localStorage.removeItem(originalAdminStorageKey);
-          return false;
-        }
+            return EMPTY;
+          })
+        );
       }
+      
     };
   })
 );

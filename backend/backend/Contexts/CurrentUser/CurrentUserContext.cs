@@ -1,41 +1,55 @@
-﻿namespace backend.Contexts.CurrentUser;
+﻿using System.Security.Claims;
+
+namespace backend.Contexts.CurrentUser;
 
 public sealed class CurrentUserContext : ICurrentUserContext
 {
-    public bool IsAuthenticated { get; private set; }
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public int? UserId { get; private set; }
-
-    public string? UserName { get; private set; }
-
-    public string? Email { get; private set; }
-
-    public IReadOnlyList<string> Roles { get; private set; } = [];
-
-    public bool IsImpersonating { get; private set; }
-
-    public int? ImpersonatedByUserId { get; private set; }
-
-    public string? ImpersonatedByUserName { get; private set; }
-
-    public void Set(
-        int? userId,
-        string? userName,
-        string? email,
-        IReadOnlyList<string> roles,
-        bool isImpersonating,
-        int? impersonatedByUserId,
-        string? impersonatedByUserName)
+    public CurrentUserContext(IHttpContextAccessor httpContextAccessor)
     {
-        IsAuthenticated = userId.HasValue;
-        UserId = userId;
-        UserName = userName;
-        Email = email;
-        Roles = roles;
-        IsImpersonating = isImpersonating;
-        ImpersonatedByUserId = impersonatedByUserId;
-        ImpersonatedByUserName = impersonatedByUserName;
+        _httpContextAccessor = httpContextAccessor;
     }
+
+    private ClaimsPrincipal? User =>
+        _httpContextAccessor.HttpContext?.User;
+
+    public bool IsAuthenticated =>
+        User?.Identity?.IsAuthenticated == true;
+
+    public int? UserId =>
+        GetIntClaim(
+            ClaimTypes.NameIdentifier,
+            "sub",
+            "userId");
+
+    public string? UserName =>
+        GetStringClaim(
+            ClaimTypes.Name,
+            "name");
+
+    public string? Email =>
+        GetStringClaim(
+            ClaimTypes.Email,
+            "email");
+
+    public IReadOnlyList<string> Roles =>
+        User?
+            .FindAll(ClaimTypes.Role)
+            .Select(claim => claim.Value)
+            .Concat(User.FindAll("role").Select(claim => claim.Value))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList()
+        ?? [];
+
+    public bool IsImpersonating =>
+        GetBoolClaim("is_impersonating");
+
+    public int? ImpersonatedByUserId =>
+        GetIntClaim("impersonated_by_user_id");
+
+    public string? ImpersonatedByUserName =>
+        GetStringClaim("impersonated_by_user_name");
 
     public int GetRequiredUserId()
     {
@@ -50,5 +64,41 @@ public sealed class CurrentUserContext : ICurrentUserContext
     public bool IsInRole(string role)
     {
         return Roles.Contains(role, StringComparer.OrdinalIgnoreCase);
+    }
+
+    private string? GetStringClaim(params string[] claimTypes)
+    {
+        if (User is null)
+        {
+            return null;
+        }
+
+        foreach (var claimType in claimTypes)
+        {
+            var value = User.FindFirstValue(claimType);
+
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                return value;
+            }
+        }
+
+        return null;
+    }
+
+    private int? GetIntClaim(params string[] claimTypes)
+    {
+        var value = GetStringClaim(claimTypes);
+
+        return int.TryParse(value, out var result)
+            ? result
+            : null;
+    }
+
+    private bool GetBoolClaim(params string[] claimTypes)
+    {
+        var value = GetStringClaim(claimTypes);
+
+        return bool.TryParse(value, out var result) && result;
     }
 }

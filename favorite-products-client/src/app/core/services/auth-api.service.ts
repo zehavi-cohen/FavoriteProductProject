@@ -27,4 +27,24 @@ export class AuthApiService {
       request
     );
   }
+
+  me(): Observable<AuthResponse> {
+    return this.http.get<AuthResponse>(
+      `${this.apiUrl}/api/auth/me`
+    );
+  }
+
+  logout(): Observable<void> {
+    return this.http.post<void>(
+      `${this.apiUrl}/api/auth/logout`,
+      {}
+    );
+  }
+
+  stopImpersonation(): Observable<AuthResponse> {
+  return this.http.post<AuthResponse>(
+    `${this.apiUrl}/api/admin/stop-impersonation`,
+    {}
+  );
+}
 }

@@ -10,8 +10,6 @@ public sealed record AuthResponse
 
      List<string> Roles,
 
-     string Token,
-
      bool IsImpersonating=false,
 
      int? ImpersonatedByUserId = null,

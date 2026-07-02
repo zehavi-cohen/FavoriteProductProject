@@ -9,44 +9,25 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authStore = inject(AuthStore);
   const router = inject(Router);
 
-  const token = authStore.token();
-
-  const isAuthRequest =
+  const isLoginOrRegisterRequest =
     req.url.includes('/api/auth/login') ||
     req.url.includes('/api/auth/register');
 
-  if (token && !isValidJwtFormat(token) && !isAuthRequest) {
-    authStore.logout();
+  const isMeRequest =
+    req.url.includes('/api/auth/me');
 
-    queueMicrotask(() => {
-      router.navigate(['/login'], {
-        replaceUrl: true
-      });
-    });
-
-    return throwError(() => new HttpErrorResponse({
-      status: 401,
-      statusText: 'Invalid token format',
-      url: req.url
-    }));
-  }
-
-  const requestToSend = token
-    ? req.clone({
-        setHeaders: {
-          Authorization: `Bearer ${token}`
-        }
-      })
-    : req;
+  const requestToSend = req.clone({
+    withCredentials: true
+  });
 
   return next(requestToSend).pipe(
     catchError((error: HttpErrorResponse) => {
-      if (isAuthRequest) {
+      if (isLoginOrRegisterRequest || isMeRequest) {
         return throwError(() => error);
       }
 
       if (error.status === 401) {
-        authStore.logout();
+        authStore.clearAuth();
 
         queueMicrotask(() => {
           router.navigate(['/login'], {
@@ -67,7 +48,3 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     })
   );
 };
-
-function isValidJwtFormat(token: string): boolean {
-  return /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(token);
-}

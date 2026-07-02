@@ -21,12 +21,9 @@ public static class ProductEndpoints
     }
 
     private static async Task<Ok<List<ProductDto>>> GetMyProductsAsync(
-        HttpContext httpContext,
         ProductService productService)
     {
-        var userId = httpContext.User.GetUserId();
-
-        var products = await productService.GetProductsForUserAsync();
+        var products = await productService.GetMyProductsAsync();
 
         return TypedResults.Ok(products);
     }
@@ -34,13 +31,10 @@ public static class ProductEndpoints
     private static async Task<Results<NoContent, NotFound<string>>> SetFavoriteAsync(
         int productId,
         SetFavoriteRequest request,
-        HttpContext httpContext,
         ProductService productService)
     {
-        var userId = httpContext.User.GetUserId();
 
         var updated = await productService.SetFavoriteAsync(
-            userId,
             productId,
             request.IsFavorite);
 

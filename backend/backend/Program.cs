@@ -26,10 +26,10 @@ builder.Services.AddApplicationAuthorization();
 builder.Services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();
 
 //הגדרות הנתונים לקונטקסט
-builder.Services.AddScoped<CurrentUserContext>();
+builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddScoped<ICurrentUserContext>(serviceProvider =>
-    serviceProvider.GetRequiredService<CurrentUserContext>());
+builder.Services.AddScoped<ICurrentUserContext, CurrentUserContext>();
+
 //swagger
 builder.Services.AddApplicationSwagger();
 
@@ -43,7 +43,7 @@ app.UseSwaggerUI();
 app.UseCors(ApplicationServiceExtensions.AngularClientCorsPolicy);
 
 app.UseAuthentication();
-app.UseCurrentUser();
+
 app.UseAuthorization();
 
 // Endpoints- מיפוי ה 

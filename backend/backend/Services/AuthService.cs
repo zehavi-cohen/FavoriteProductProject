@@ -1,4 +1,6 @@
-﻿using backend.Data;
+﻿using backend.Authentication;
+using backend.Authorization;
+using backend.Data;
 using backend.DTOs.Auth;
 using backend.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -22,27 +24,27 @@ public class AuthService
         _tokenService = tokenService;
     }
 
-    public async Task<bool> UserExistsAsync(
-        string userName,
-        string email)
+    private async Task<bool> UserExistsAsync(
+    string userName,
+    string email)
     {
         return await _db.AppUsers.AnyAsync(x =>
             x.UserName == userName ||
             x.Email == email);
     }
 
-    public async Task<AuthResponse?> RegisterAsync(RegisterRequest request)
+    public async Task<AuthenticationResult?> RegisterAsync(RegisterRequest request)
     {
-        var userExists = await _db.AppUsers.AnyAsync(x =>
-        x.UserName == request.UserName ||
-        x.Email == request.Email);
+        var userExists = await UserExistsAsync(
+            request.UserName,
+            request.Email);
 
-            if (userExists)
-            {
-                return null;
-            }
+        if (userExists)
+        {
+            return null;
+        }
         var userRole = await _db.Roles
-            .FirstOrDefaultAsync(x => x.Name == "User");
+            .FirstOrDefaultAsync(x => x.Name == AppRoles.User);
 
         if (userRole == null)
         {
@@ -76,10 +78,10 @@ public class AuthService
                 .ThenInclude(x => x.Role)
             .FirstAsync(x => x.Id == user.Id);
 
-        return CreateAuthResponse(userWithRoles);
+        return CreateAuthenticationResult(userWithRoles);
     }
 
-    public async Task<AuthResponse?> LoginAsync(LoginRequest request)
+    public async Task<AuthenticationResult?> LoginAsync(LoginRequest request)
     {
         var user = await _db.AppUsers
             .Include(x => x.UserRoles)
@@ -108,22 +110,25 @@ public class AuthService
             return null;
         }
 
-        return CreateAuthResponse(user);
+        return CreateAuthenticationResult(user);
     }
 
-    private AuthResponse CreateAuthResponse(AppUser user)
+    private AuthenticationResult CreateAuthenticationResult(AppUser user)
     {
-        var token = _tokenService.CreateToken(user);
+        var accessToken = _tokenService.CreateToken(user);
 
-        return new AuthResponse
-        (
-            UserId : user.Id,
-            UserName : user.UserName,
-            Email : user.Email,
-            Roles : user.UserRoles
+        var response = new AuthResponse(
+            UserId: user.Id,
+            UserName: user.UserName,
+            Email: user.Email,
+            Roles: user.UserRoles
                 .Select(x => x.Role.Name)
-                .ToList(),
-            Token: token
+                .ToList()
+        );
+
+        return new AuthenticationResult(
+            Response: response,
+            AccessToken: accessToken
         );
     }
 }
