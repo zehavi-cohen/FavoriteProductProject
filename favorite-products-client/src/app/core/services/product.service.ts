@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 import { Product } from '../../models/product.model';
 
@@ -11,11 +12,11 @@ export class ProductService {
 
   constructor(private http: HttpClient) {}
 
-  getMyProducts() {
+  getMyProducts(): Observable<Product[]> {
     return this.http.get<Product[]>(`${this.apiUrl}/api/products/my`);
   }
 
-  setFavorite(productId: number, isFavorite: boolean) {
+  setFavorite(productId: number, isFavorite: boolean): Observable<void> {
     return this.http.put<void>(
       `${this.apiUrl}/api/products/${productId}/favorite`,
       { isFavorite }

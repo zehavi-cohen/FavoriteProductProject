@@ -1,5 +1,9 @@
-﻿using backend.DTOs.Auth;
+﻿using backend.Contexts.CurrentUser;
+using backend.DTOs.Auth;
+using backend.Extensions;
 using backend.Services;
+using FluentValidation;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace backend.Endpoints;
 
@@ -10,40 +14,105 @@ public static class AuthEndpoints
         var group = app.MapGroup("/api/auth")
             .WithTags("Auth");
 
-        group.MapPost("/register", async (
-            RegisterRequest request,
-            AuthService authService) =>
-        {
-            var result = await authService.RegisterAsync(request);
+        group.MapPost("/register", RegisterAsync);
 
-            return ToHttpResult(result);
-        });
+        group.MapPost("/login", LoginAsync);
 
-        group.MapPost("/login", async (
-            LoginRequest request,
-            AuthService authService) =>
-        {
-            var result = await authService.LoginAsync(request);
+        group.MapPost("/logout", LogoutAsync);
 
-            return ToHttpResult(result);
-        });
+        group.MapGet("/me", GetMeAsync)
+            .RequireAuthorization();
 
         return app;
     }
 
-    private static IResult ToHttpResult<T>(ServiceResult<T> result)
+    private static async Task<Results<Ok<AuthResponse>, ValidationProblem, BadRequest<string>, ProblemHttpResult>> RegisterAsync(
+        RegisterRequest request,
+        IValidator<RegisterRequest> validator,
+        AuthService authService,
+        HttpResponse httpResponse,
+        IConfiguration configuration)
     {
-        if (result.IsSuccess)
+        var validationResult = await validator.ValidateAsync(request);
+
+        if (!validationResult.IsValid)
         {
-            return Results.Ok(result.Data);
+            return TypedResults.ValidationProblem(
+                validationResult.ToValidationProblemDictionary()
+            );
         }
 
-        return result.StatusCode switch
+        try
         {
-            StatusCodes.Status400BadRequest => Results.BadRequest(result.ErrorMessage),
-            StatusCodes.Status401Unauthorized => Results.Unauthorized(),
-            StatusCodes.Status404NotFound => Results.NotFound(result.ErrorMessage),
-            _ => Results.Problem(result.ErrorMessage)
-        };
+            var result = await authService.RegisterAsync(request);
+
+            if (result is null)
+            {
+                return TypedResults.BadRequest("User name or email already exists.");
+            }
+
+            httpResponse.AppendAuthCookie(
+                result.AccessToken,
+                configuration);
+
+            return TypedResults.Ok(result.Response);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return TypedResults.Problem(ex.Message);
+        }
+    }
+
+    private static async Task<Results<Ok<AuthResponse>, ValidationProblem, UnauthorizedHttpResult>> LoginAsync(
+        LoginRequest request,
+        IValidator<LoginRequest> validator,
+        AuthService authService,
+        HttpResponse httpResponse,
+        IConfiguration configuration)
+    {
+        var validationResult = await validator.ValidateAsync(request);
+
+        if (!validationResult.IsValid)
+        {
+            return TypedResults.ValidationProblem(
+                validationResult.ToValidationProblemDictionary()
+            );
+        }
+
+        var result = await authService.LoginAsync(request);
+
+        if (result is null)
+        {
+            return TypedResults.Unauthorized();
+        }
+
+        httpResponse.AppendAuthCookie(
+            result.AccessToken,
+            configuration);
+
+        return TypedResults.Ok(result.Response);
+    }
+
+    private static NoContent LogoutAsync(HttpResponse httpResponse)
+    {
+        httpResponse.DeleteAuthCookie();
+
+        return TypedResults.NoContent();
+    }
+
+    private static Ok<AuthResponse> GetMeAsync(
+    ICurrentUserContext currentUser)
+    {
+        var response = new AuthResponse(
+            UserId: currentUser.GetRequiredUserId(),
+            UserName: currentUser.UserName ?? string.Empty,
+            Email: currentUser.Email ?? string.Empty,
+            Roles: currentUser.Roles.ToList(),
+            IsImpersonating: currentUser.IsImpersonating,
+            ImpersonatedByUserId: currentUser.ImpersonatedByUserId,
+            ImpersonatedByUserName: currentUser.ImpersonatedByUserName
+        );
+
+        return TypedResults.Ok(response);
     }
 }

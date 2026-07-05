@@ -1,0 +1,46 @@
+# For more info on HTTP files go to https://aka.ms/vs/httpfile
+@baseUrl = https://localhost:7001
+
+### 1. Login as admin
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "userNameOrEmail": "admin1",
+  "password": "123456"
+}
+
+
+### 2. Paste admin token here after login
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjQiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiYWRtaW4xIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvZW1haWxhZGRyZXNzIjoiYWRtaW4xQHRlc3QuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjpbIlVzZXIiLCJBZG1pbiJdLCJleHAiOjE3ODI3MjA4MzksImlzcyI6ImJhY2tlbmQiLCJhdWQiOiJGYXZvcml0ZVByb2R1Y3RzQ2xpZW50In0.TZitIvdFXVtfvbM_t-DE80JOES8Pt8Mqrr_O6ZKFtzo
+
+
+### 3. Get users - admin only
+GET {{baseUrl}}/api/admin/users
+Authorization: Bearer {{adminToken}}
+
+
+### 4. Login as selected user
+# Replace 2 with the real userId from the users response
+POST {{baseUrl}}/api/admin/users/2/login-as
+Authorization: Bearer {{adminToken}}
+
+
+### 5. Paste impersonation token here after login-as
+@impersonationToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjIiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoidXNlcjEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJ1c2VyMUBnbWFpbC5jb20iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJVc2VyIiwiaXNfaW1wZXJzb25hdGluZyI6InRydWUiLCJpbXBlcnNvbmF0ZWRfYnlfdXNlcl9pZCI6IjQiLCJpbXBlcnNvbmF0ZWRfYnlfdXNlcl9uYW1lIjoiYWRtaW4xIiwiZXhwIjoxNzgyNzIwOTE2LCJpc3MiOiJiYWNrZW5kIiwiYXVkIjoiRmF2b3JpdGVQcm9kdWN0c0NsaWVudCJ9.R2m6ntsnW2OHRjJaE7lZqkcSULgAD2o2hRFq2YTd950
+
+
+### 6. Get products as impersonated user
+GET {{baseUrl}}/api/products/my
+Authorization: Bearer {{impersonationToken}}
+
+
+### 7. Optional - update favorite as impersonated user
+# Replace 1 with a real productId
+PUT {{baseUrl}}/api/products/1/favorite
+Authorization: Bearer {{impersonationToken}}
+Content-Type: application/json
+
+{
+  "isFavorite": true
+}

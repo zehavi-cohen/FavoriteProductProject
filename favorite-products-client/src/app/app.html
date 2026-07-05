@@ -1,27 +1,4 @@
-<header class="app-header">
-  <div class="app-header__inner">
-    <a routerLink="/products" class="app-logo">
-      מוצרים אהובים
-    </a>
-
-    <nav class="app-nav">
-      @if (auth.currentUser()) {
-        <a routerLink="/products">המוצרים שלי</a>
-
-        @if (auth.isAdmin()) {
-          <a routerLink="/admin/users">ניהול משתמשים</a>
-        }
-
-        <button type="button" class="logout-btn" (click)="logout()">
-          יציאה
-        </button>
-      } @else {
-        <a routerLink="/login">כניסה</a>
-        <a routerLink="/register">הרשמה</a>
-      }
-    </nav>
-  </div>
-</header>
+<app-header />
 
 <main>
   <router-outlet />

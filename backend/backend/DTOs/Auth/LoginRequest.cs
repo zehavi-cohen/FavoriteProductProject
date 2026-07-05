@@ -1,8 +1,8 @@
 ﻿namespace backend.DTOs.Auth;
 
-public class LoginRequest
-{
-    public string UserNameOrEmail { get; set; } = string.Empty;
+public sealed record LoginRequest
+(
+     string UserNameOrEmail,
 
-    public string Password { get; set; } = string.Empty;
-}
+     string Password
+);

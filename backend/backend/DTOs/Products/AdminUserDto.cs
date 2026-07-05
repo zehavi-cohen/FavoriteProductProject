@@ -1,14 +1,14 @@
 ﻿namespace backend.DTOs.Admin;
 
-public class AdminUserDto
-{
-    public int UserId { get; set; }
+public sealed record AdminUserDto
+(
+     int UserId,
 
-    public string UserName { get; set; } = string.Empty;
+     string UserName,
 
-    public string Email { get; set; } = string.Empty;
+     string Email,
 
-    public bool IsActive { get; set; }
+     bool IsActive,
 
-    public List<string> Roles { get; set; } = new();
-}
+     List<string> Roles
+);

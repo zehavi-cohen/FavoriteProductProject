@@ -1,0 +1,17 @@
+<section class="page">
+  @if (store.isLoading()) {
+    <div class="card">
+      טוען מוצרים...
+    </div>
+  } @else {
+    @if (store.errorMessage()) {
+      <div class="error-message">
+        {{ store.errorMessage() }}
+      </div>
+    }
+   <app-products-table
+    [products]="store.products()"
+    (favoriteChanged)="store.toggleFavorite($event.product, $event.isFavorite)"
+  />
+  }
+</section>

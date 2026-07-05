@@ -5,9 +5,8 @@ import { adminGuard } from './core/guards/admin.guard';
 
 import { Login } from './pages/login/login';
 import { Register } from './pages/register/register';
-import { Products } from './pages/products/products';
+import { Products } from './pages/products/products/products';
 import { AdminUsers } from './pages/admin-users/admin-users';
-import { AdminUserProducts } from './pages/admin-user-products/admin-user-products';
 
 export const routes: Routes = [
   {
@@ -26,11 +25,6 @@ export const routes: Routes = [
   {
     path: 'admin/users',
     component: AdminUsers,
-    canActivate: [authGuard, adminGuard]
-  },
-  {
-    path: 'admin/users/:userId/products',
-    component: AdminUserProducts,
     canActivate: [authGuard, adminGuard]
   },
   {

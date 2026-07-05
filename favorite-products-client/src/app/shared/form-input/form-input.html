@@ -1,0 +1,20 @@
+<div class="form-field">
+  <label>{{ label() }}</label>
+
+  <input
+    #inputElement
+    [type]="type()"
+    [value]="value()"
+    [disabled]="disabled()"
+    [attr.autocomplete]="autocomplete() || null"
+    [attr.placeholder]="placeholder() || null"
+    (input)="onInput(inputElement.value)"
+    (blur)="onBlur()"
+  />
+
+  @if (showError()) {
+    <div class="error-message form-input-error">
+      {{ errorText() }}
+    </div>
+  }
+</div>

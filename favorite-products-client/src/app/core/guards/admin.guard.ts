@@ -1,15 +1,16 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 
-import { AuthService } from '../services/auth.service';
+import { AuthStore } from '../stores/auth.store';
 
 export const adminGuard: CanActivateFn = () => {
-  const authService = inject(AuthService);
+  const authStore = inject(AuthStore);
   const router = inject(Router);
 
-  if (authService.isLoggedIn() && authService.isAdmin()) {
+  if (authStore.isLoggedIn() && authStore.isAdmin()) {
     return true;
   }
 
-  return router.createUrlTree(['/products']);
+  router.navigate(['/products']);
+  return false;
 };

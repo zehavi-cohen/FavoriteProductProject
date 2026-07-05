@@ -1,6 +1,6 @@
 import { Component, computed, input, output, signal } from '@angular/core';
 
-import { Product } from '../../models/product.model';
+import { Product } from '../../../models/product.model';
 
 type ProductsFilter = 'all' | 'favorites' | 'notFavorites';
 
@@ -12,14 +12,13 @@ type ProductsFilter = 'all' | 'favorites' | 'notFavorites';
   styleUrl: './products-table.scss'
 })
 export class ProductsTable {
-  title = input.required<string>();
   products = input.required<Product[]>();
 
   searchText = signal('');
   filter = signal<ProductsFilter>('all');
 
   totalProducts = computed(() => this.products().length);
-
+  
   favoriteProductsCount = computed(() =>
     this.products().filter(product => product.isFavorite).length
   );

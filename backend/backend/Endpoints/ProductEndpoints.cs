@@ -1,6 +1,7 @@
 ﻿using backend.DTOs.Products;
 using backend.Extensions;
 using backend.Services;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace backend.Endpoints;
 
@@ -12,38 +13,36 @@ public static class ProductEndpoints
             .WithTags("Products")
             .RequireAuthorization();
 
-        group.MapGet("/my", async (
-            HttpContext httpContext,
-            ProductService productService) =>
-        {
-            var userId = httpContext.User.GetUserId();
+        group.MapGet("/my", GetMyProductsAsync);
 
-            var products = await productService.GetProductsForUserAsync(userId);
-
-            return Results.Ok(products);
-        });
-
-        group.MapPut("/{productId:int}/favorite", async (
-            int productId,
-            SetFavoriteRequest request,
-            HttpContext httpContext,
-            ProductService productService) =>
-        {
-            var userId = httpContext.User.GetUserId();
-
-            var success = await productService.SetFavoriteAsync(
-                userId,
-                productId,
-                request.IsFavorite);
-
-            if (!success)
-            {
-                return Results.NotFound("Product was not found.");
-            }
-
-            return Results.NoContent();
-        });
+        group.MapPut("/{productId:int}/favorite", SetFavoriteAsync);
 
         return app;
+    }
+
+    private static async Task<Ok<List<ProductDto>>> GetMyProductsAsync(
+        ProductService productService)
+    {
+        var products = await productService.GetMyProductsAsync();
+
+        return TypedResults.Ok(products);
+    }
+
+    private static async Task<Results<NoContent, NotFound<string>>> SetFavoriteAsync(
+        int productId,
+        SetFavoriteRequest request,
+        ProductService productService)
+    {
+
+        var updated = await productService.SetFavoriteAsync(
+            productId,
+            request.IsFavorite);
+
+        if (!updated)
+        {
+            return TypedResults.NotFound("Product was not found.");
+        }
+
+        return TypedResults.NoContent();
     }
 }

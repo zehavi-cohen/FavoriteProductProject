@@ -1,14 +1,18 @@
 ﻿namespace backend.DTOs.Auth;
 
-public class AuthResponse
-{
-    public int UserId { get; set; }
+public sealed record AuthResponse
+(
+     int UserId,
 
-    public string UserName { get; set; } = string.Empty;
+     string UserName,
 
-    public string Email { get; set; } = string.Empty;
+     string Email,
 
-    public List<string> Roles { get; set; } = new();
+     List<string> Roles,
 
-    public string Token { get; set; } = string.Empty;
-}
+     bool IsImpersonating=false,
+
+     int? ImpersonatedByUserId = null,
+
+     string? ImpersonatedByUserName=null
+);
